@@ -1,0 +1,40 @@
+:root {
+  --num-squares: 8;
+  --square-length: 100px;
+  --board-width: calc(var(--num-squares) * var(--square-length));
+  --board-height: calc(var(--num-squares) * var(--square-length));
+}
+
+table.chessboard {
+  border-collapse: collapse;
+  border: 2px solid black;
+}
+
+.square {
+  width: var(--square-length);
+  height: var(--square-length);
+  display: inline-block; /* defina a propriedade display para inline-block */
+  text-align: center;
+}
+
+.white {
+	background-color: #f0d9b5;
+}
+
+
+.black {
+	background-color: #b58863;
+}
+
+
+.piece {
+	margin: auto;
+	position: relative;
+  user-select: none;
+  pointer-events: none;
+}
+
+.selected {
+  background-color: yellow;
+}
+/* ... outras classes para as demais peças do xadrez */
