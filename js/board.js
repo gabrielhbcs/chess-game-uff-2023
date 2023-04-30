@@ -19,6 +19,7 @@ class Board {
 
 	isEmpty(row, col) {
 		for (let piece of pieces) {
+
 			if (piece.row === row && piece.col === col) {
 				return false;
 			}
