@@ -61,6 +61,22 @@ class Knight extends Piece {
 		super(color, row, col);
 		this.type = "knight";
 	}
+
+	isValidMove(targetRow, targetCol) {
+		if (targetCol === this.col + 2 || targetCol === this.col - 2) {
+			if (targetRow === this.row + 1 || targetRow === this.row -1 ) {
+				return true;
+			}
+			return false;
+		}
+		else if(targetRow === this.row + 2 || targetRow === this.row - 2) {
+			if (targetCol === this.col + 1 || targetCol === this.col -1 ) {
+				return true;
+			}
+			return false;
+		}
+		return false;
+	}
 }
 
 class Rook extends Piece {
