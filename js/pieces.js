@@ -54,61 +54,59 @@ class Bishop extends Piece {
   }
 
   possibleMoves = [];
-
-  calculatePossibleBishopMoves() {
-    let possibleRow = this.row;
+  calculatePossibleMoves() {
+	let possibleRow = this.row;
     let possibleCol = this.col;
     this.possibleMoves = [];
     while (possibleRow !== 0 && possibleCol !== 0) {
-      possibleRow -= 1;
-      possibleCol -= 1;
-      if (board.isEmpty(possibleRow, possibleCol)) {
-        this.possibleMoves.push([possibleRow, possibleCol]);
-      } else {
-        break;
-      }
+		possibleRow -= 1;
+		possibleCol -= 1;
+		if (board.isEmpty(possibleRow, possibleCol)) {
+			this.possibleMoves.push([possibleRow, possibleCol]);
+		} else {
+			break;
+		}
     }
 
     possibleRow = this.row;
     possibleCol = this.col;
-    this.possibleMoves.topRight = [];
     while (possibleRow !== 0 && possibleCol !== 7) {
-      possibleRow -= 1;
-      possibleCol += 1;
-      if (board.isEmpty(possibleRow, possibleCol)) {
-        this.possibleMoves.push([possibleRow, possibleCol]);
-      } else {
-        break;
-      }
+		possibleRow -= 1;
+		possibleCol += 1;
+		if (board.isEmpty(possibleRow, possibleCol)) {
+			this.possibleMoves.push([possibleRow, possibleCol]);
+		} else {
+			break;
+		}
     }
-
+	
     possibleRow = this.row;
     possibleCol = this.col;
     while (possibleRow !== 7 && possibleCol !== 0) {
-      possibleRow += 1;
-      possibleCol -= 1;
-      if (board.isEmpty(possibleRow, possibleCol)) {
-        this.possibleMoves.push([possibleRow, possibleCol]);
-      } else {
-        break;
-      }
+		possibleRow += 1;
+		possibleCol -= 1;
+		if (board.isEmpty(possibleRow, possibleCol)) {
+			this.possibleMoves.push([possibleRow, possibleCol]);
+		} else {
+			break;
+		}
     }
-
+	
     possibleRow = this.row;
     possibleCol = this.col;
     while (possibleRow !== 7 && possibleCol !== 7) {
-      possibleRow += 1;
-      possibleCol += 1;
-      if (board.isEmpty(possibleRow, possibleCol)) {
-        this.possibleMoves.push([possibleRow, possibleCol]);
-      } else {
-        break;
-      }
+		possibleRow += 1;
+		possibleCol += 1;
+		if (board.isEmpty(possibleRow, possibleCol)) {
+			this.possibleMoves.push([possibleRow, possibleCol]);
+		} else {
+			break;
+		}
     }
   }
-
+  
   isValidMove(row, col) {
-    this.calculatePossibleBishopMoves();
+    this.calculatePossibleMoves();
     function compareArray(matrix) {
       if (
         matrix.find(
@@ -121,7 +119,7 @@ class Bishop extends Piece {
     }
 
     if (compareArray(this.possibleMoves)) {
-      this.calculatePossibleBishopMoves();
+      this.calculatePossibleMoves();
       return true;
     }
     return false;
