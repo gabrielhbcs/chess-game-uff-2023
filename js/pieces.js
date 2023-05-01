@@ -39,6 +39,16 @@ class King extends Piece {
 	constructor(color, row, col) {
 		super(color, row, col);
 		this.type = "king";
+		let hasMoved = false;
+	}
+
+	isValidMove(row, col){
+		if(row === this.row || row === this.row - 1 || row === this.row + 1){
+			if(col === this.col || col === this.col - 1 || col === this.col + 1){
+				return true
+			}
+		}
+		return false
 	}
 }
 
