@@ -39,13 +39,58 @@ class King extends Piece {
 	constructor(color, row, col) {
 		super(color, row, col);
 		this.type = "king";
-		let hasMoved = false;
+		// atributo para validação do roque
+		this.hasMoved = false;
 	}
 
-	isValidMove(row, col){
-		if(row === this.row || row === this.row - 1 || row === this.row + 1){
-			if(col === this.col || col === this.col - 1 || col === this.col + 1){
+	//mudança de comportamento para validação do roque
+	move(row, col){
+		if(!this.hasMoved) this.hasMoved = true
+		super.move(row, col)
+	}
+
+	isValidMove(newRow, newCol){
+		//verifica se a posição escolhida está à uma cas de distância da posição atual
+		if(newRow === this.row || newRow === this.row - 1 || newRow === this.row + 1){
+			if(newCol === this.col || newCol === this.col - 1 || newCol === this.col + 1){
 				return true
+			}
+			//verifica se a posição escolhida é válida para o roque
+			else return this.isValidCastleMove(newRow, newCol)
+		}
+		return false
+	}
+
+	//valida a jogada do roque
+	isValidCastleMove(newRow, newCol){
+		if(newRow === this.row && !this.hasMoved){
+			//para a torre à direita
+			if(newCol === this.col + 2){
+				let auxCol = this.col
+				while(auxCol <= 7){
+					let pieceCheck = board.getPiece(this.row, ++auxCol)
+
+					if(pieceCheck && pieceCheck.type !== 'rook') return false
+
+					if(pieceCheck && pieceCheck.type === 'rook'){
+						if(pieceCheck.hasMoved) return false
+						return true
+					} 
+				}
+			}
+			//para a torre à esquerda
+			else if(newCol === this.col - 2){
+				let auxCol = this.col
+				while(auxCol >= 0){
+					let pieceCheck = board.getPiece(this.row, --auxCol)
+
+					if(pieceCheck && pieceCheck.type !== 'rook') return false
+
+					if(pieceCheck && pieceCheck.type === 'rook'){
+						if(pieceCheck.hasMoved) return false
+						return true
+					} 
+				}
 			}
 		}
 		return false
@@ -77,6 +122,14 @@ class Rook extends Piece {
 	constructor(color, row, col) {
 		super(color, row, col);
 		this.type = "rook";
+		//atributo para a validação do roque
+		this.hasMoved = false;
+	}
+
+	//mudança de comportamento para validação do roque
+	move(row, col){
+		if(!this.hasMoved) this.hasMoved = true
+		super.move(row, col)
 	}
 
 	isValidMove(row, col) {
