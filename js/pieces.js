@@ -47,7 +47,30 @@ class Queen extends Piece {
 		super(color, row, col);
 		this.type = "queen";
 	}
-}
+
+	isValidMove(newRow, newCol) {
+		// verificando se é a mesma posição
+		if(newRow === this.row && newCol === this.col) return false;
+		// verifique se o movimento é válido na vertical, horizontal ou diagonal
+		if (newRow === this.row || newCol === this.col || Math.abs(newRow - this.row) === Math.abs(newCol - this.col)) {
+			// determinando a direção (delta) do movimento (0 = parado)
+			const deltaRow = newRow - this.row > 0 ? 1 : newRow - this.row < 0 ? -1 : 0; // 1 = direita, -1 = esquerda
+			const deltaCol = newCol - this.col > 0 ? 1 : newCol - this.col < 0 ? -1 : 0; // 1 = cima, -1 = baixo
+			// verificando se existem peças no caminho
+			let checkRow = this.row + deltaRow;
+			let checkCol = this.col + deltaCol;
+			while (checkRow !== newRow || checkCol !== newCol) {
+				if (board.isEmpty(checkRow, checkCol) === false) return false;
+				checkRow += deltaRow;
+				checkCol += deltaCol;
+			}
+			// não tem peças no caminho
+			return true;
+		  }
+		// caso contrário, movimento é inválido
+		return false
+		}
+	}
 
 class Bishop extends Piece {
 	constructor(color, row, col) {
