@@ -58,8 +58,37 @@ class Board {
 	movePiece(row, col) {
 		let old_row = selectedPiece.row;
 		let old_col = selectedPiece.col;
-		selectedPiece.move(row, col);
 		
+		//caso da jogada do roque
+		if(selectedPiece.type === 'king'){
+			//movimentação da torre
+			if(selectedPiece.isValidCastleMove(row, col)){
+				let castleRook;
+				let castleRookCol;
+				//caso à esquera
+				if(col < old_col){
+					if(selectedPiece.color === 'black') castleRook = this.getPiece(7, 0)
+					else castleRook = this.getPiece(0, 0)
+					castleRookCol = col + 1
+				}
+				//caso à direita
+				else{
+					if(selectedPiece.color === 'black') castleRook = this.getPiece(7, 7)
+					else castleRook = this.getPiece(0, 7)
+					castleRookCol = col - 1
+				}
+				
+				//desenha e atualiza a posição da torre
+				let oldRookCell = board.squares[castleRook.row][castleRook.col];
+				castleRook.move(row, castleRookCol)
+				let newRookCell = board.squares[castleRook.row][castleRook.col];
+				castleRook.draw(newRookCell)
+				oldRookCell.innerHTML = "";
+			}	
+		}
+
+		selectedPiece.move(row, col);
+
 		selectedCell.classList.remove("selected");
 		let square = board.squares[selectedPiece.row][selectedPiece.col];
 		selectedPiece.draw(square);

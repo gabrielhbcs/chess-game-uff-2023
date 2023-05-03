@@ -1,10 +1,10 @@
 const pieceEmoji = {
-	"king": { "white": "♔", "black": "♚" },
-	"queen": { "white": "♕", "black": "♛" },
-	"rook": { "white": "♖", "black": "♜" },
-	"bishop": { "white": "♗", "black": "♝" },
-	"knight": { "white": "♘", "black": "♞" },
-	"pawn": { "white": "♙", "black": "♟︎" }
+	king: { white: "♔", black: "♚" },
+	queen: { white: "♕", black: "♛" },
+	rook: { white: "♖", black: "♜" },
+	bishop: { white: "♗", black: "♝" },
+	knight: { white: "♘", black: "♞" },
+	pawn: { white: "♙", black: "♟︎" },
 };
 
 class Piece {
@@ -18,7 +18,6 @@ class Piece {
 		this.row = row;
 		this.col = col;
 
-
 		// por enquanto só as peças pretas jogam
 		// currentPlayer = currentPlayer === "white" ? "black" : "white";
 	}
@@ -27,11 +26,10 @@ class Piece {
 		let piece = document.createElement("div");
 		piece.className = "piece";
 		piece.innerHTML = pieceEmoji[this.type][this.color];
-		let fontSize = 7 * parent.clientHeight / 10;
+		let fontSize = (7 * parent.clientHeight) / 10;
 		piece.style.fontSize = fontSize + "px";
 		piece.style.userSelect = "none";
 		parent.appendChild(piece);
-
 	}
 }
 
@@ -39,6 +37,61 @@ class King extends Piece {
 	constructor(color, row, col) {
 		super(color, row, col);
 		this.type = "king";
+		// atributo para validação do roque
+		this.hasMoved = false;
+	}
+
+	//mudança de comportamento para validação do roque
+	move(row, col){
+		if(!this.hasMoved) this.hasMoved = true
+		super.move(row, col)
+	}
+
+	isValidMove(newRow, newCol){
+		//verifica se a posição escolhida está à uma cas de distância da posição atual
+		if(newRow === this.row || newRow === this.row - 1 || newRow === this.row + 1){
+			if(newCol === this.col || newCol === this.col - 1 || newCol === this.col + 1){
+				return true
+			}
+			//verifica se a posição escolhida é válida para o roque
+			else return this.isValidCastleMove(newRow, newCol)
+		}
+		return false
+	}
+
+	//valida a jogada do roque
+	isValidCastleMove(newRow, newCol){
+		if(newRow === this.row && !this.hasMoved){
+			//para a torre à direita
+			if(newCol === this.col + 2){
+				let auxCol = this.col
+				while(auxCol <= 7){
+					let pieceCheck = board.getPiece(this.row, ++auxCol)
+
+					if(pieceCheck && pieceCheck.type !== 'rook') return false
+
+					if(pieceCheck && pieceCheck.type === 'rook'){
+						if(pieceCheck.hasMoved) return false
+						return true
+					} 
+				}
+			}
+			//para a torre à esquerda
+			else if(newCol === this.col - 2){
+				let auxCol = this.col
+				while(auxCol >= 0){
+					let pieceCheck = board.getPiece(this.row, --auxCol)
+
+					if(pieceCheck && pieceCheck.type !== 'rook') return false
+
+					if(pieceCheck && pieceCheck.type === 'rook'){
+						if(pieceCheck.hasMoved) return false
+						return true
+					} 
+				}
+			}
+		}
+		return false
 	}
 }
 
@@ -77,6 +130,78 @@ class Bishop extends Piece {
 		super(color, row, col);
 		this.type = "bishop";
 	}
+
+	possibleMoves = [];
+	calculatePossibleMoves() {
+		let possibleRow = this.row;
+		let possibleCol = this.col;
+		this.possibleMoves = [];
+		while (possibleRow !== 0 && possibleCol !== 0) {
+			possibleRow -= 1;
+			possibleCol -= 1;
+			if (board.isEmpty(possibleRow, possibleCol)) {
+				this.possibleMoves.push([possibleRow, possibleCol]);
+			} else {
+				break;
+			}
+		}
+
+		possibleRow = this.row;
+		possibleCol = this.col;
+		while (possibleRow !== 0 && possibleCol !== 7) {
+			possibleRow -= 1;
+			possibleCol += 1;
+			if (board.isEmpty(possibleRow, possibleCol)) {
+				this.possibleMoves.push([possibleRow, possibleCol]);
+			} else {
+				break;
+			}
+		}
+
+		possibleRow = this.row;
+		possibleCol = this.col;
+		while (possibleRow !== 7 && possibleCol !== 0) {
+			possibleRow += 1;
+			possibleCol -= 1;
+			if (board.isEmpty(possibleRow, possibleCol)) {
+				this.possibleMoves.push([possibleRow, possibleCol]);
+			} else {
+				break;
+			}
+		}
+
+		possibleRow = this.row;
+		possibleCol = this.col;
+		while (possibleRow !== 7 && possibleCol !== 7) {
+			possibleRow += 1;
+			possibleCol += 1;
+			if (board.isEmpty(possibleRow, possibleCol)) {
+				this.possibleMoves.push([possibleRow, possibleCol]);
+			} else {
+				break;
+			}
+		}
+	}
+
+	isValidMove(row, col) {
+		this.calculatePossibleMoves();
+		function compareArray(matrix) {
+			if (
+				matrix.find(
+					(element) => JSON.stringify(element) === JSON.stringify([row, col])
+				) &&
+				board.isEmpty()
+			)
+				return true;
+			return false;
+		}
+
+		if (compareArray(this.possibleMoves)) {
+			this.calculatePossibleMoves();
+			return true;
+		}
+		return false;
+	}
 }
 
 class Knight extends Piece {
@@ -84,12 +209,36 @@ class Knight extends Piece {
 		super(color, row, col);
 		this.type = "knight";
 	}
+
+	isValidMove(targetRow, targetCol) {
+		if (targetCol === this.col + 2 || targetCol === this.col - 2) {
+			if (targetRow === this.row + 1 || targetRow === this.row -1 ) {
+				return true;
+			}
+			return false;
+		}
+		else if(targetRow === this.row + 2 || targetRow === this.row - 2) {
+			if (targetCol === this.col + 1 || targetCol === this.col -1 ) {
+				return true;
+			}
+			return false;
+		}
+		return false;
+	}
 }
 
 class Rook extends Piece {
 	constructor(color, row, col) {
 		super(color, row, col);
 		this.type = "rook";
+		//atributo para a validação do roque
+		this.hasMoved = false;
+	}
+
+	//mudança de comportamento para validação do roque
+	move(row, col){
+		if(!this.hasMoved) this.hasMoved = true
+		super.move(row, col)
 	}
 
 	isValidMove(row, col) {
@@ -108,7 +257,7 @@ class Rook extends Piece {
 					cells.push(board.getPiece(i, col));
 				}
 			}
-			if (cells.some(cell => cell)) {
+			if (cells.some((cell) => cell)) {
 				return false;
 			}
 			return true;
@@ -144,7 +293,10 @@ class Pawn extends Piece {
 			}
 		}
 		// Verifique se a nova posição é uma captura diagonal
-		else if (Math.abs(this.col - newCol) === 1 && board.isOpponent(newRow, newCol, this.color)) {
+		else if (
+			Math.abs(this.col - newCol) === 1 &&
+			board.isOpponent(newRow, newCol, this.color)
+		) {
 			// O peão só pode fazer uma captura diagonal
 			if (this.color === "white" && newRow === this.row + 1) {
 				return true;
