@@ -1,10 +1,10 @@
 const pieceEmoji = {
-	"king": { "white": "♔", "black": "♚" },
-	"queen": { "white": "♕", "black": "♛" },
-	"rook": { "white": "♖", "black": "♜" },
-	"bishop": { "white": "♗", "black": "♝" },
-	"knight": { "white": "♘", "black": "♞" },
-	"pawn": { "white": "♙", "black": "♟︎" }
+	king: { white: "♔", black: "♚" },
+	queen: { white: "♕", black: "♛" },
+	rook: { white: "♖", black: "♜" },
+	bishop: { white: "♗", black: "♝" },
+	knight: { white: "♘", black: "♞" },
+	pawn: { white: "♙", black: "♟︎" },
 };
 
 class Piece {
@@ -18,7 +18,6 @@ class Piece {
 		this.row = row;
 		this.col = col;
 
-
 		// por enquanto só as peças pretas jogam
 		// currentPlayer = currentPlayer === "white" ? "black" : "white";
 	}
@@ -27,11 +26,10 @@ class Piece {
 		let piece = document.createElement("div");
 		piece.className = "piece";
 		piece.innerHTML = pieceEmoji[this.type][this.color];
-		let fontSize = 7 * parent.clientHeight / 10;
+		let fontSize = (7 * parent.clientHeight) / 10;
 		piece.style.fontSize = fontSize + "px";
 		piece.style.userSelect = "none";
 		parent.appendChild(piece);
-
 	}
 }
 
@@ -109,6 +107,78 @@ class Bishop extends Piece {
 		super(color, row, col);
 		this.type = "bishop";
 	}
+
+	possibleMoves = [];
+	calculatePossibleMoves() {
+		let possibleRow = this.row;
+		let possibleCol = this.col;
+		this.possibleMoves = [];
+		while (possibleRow !== 0 && possibleCol !== 0) {
+			possibleRow -= 1;
+			possibleCol -= 1;
+			if (board.isEmpty(possibleRow, possibleCol)) {
+				this.possibleMoves.push([possibleRow, possibleCol]);
+			} else {
+				break;
+			}
+		}
+
+		possibleRow = this.row;
+		possibleCol = this.col;
+		while (possibleRow !== 0 && possibleCol !== 7) {
+			possibleRow -= 1;
+			possibleCol += 1;
+			if (board.isEmpty(possibleRow, possibleCol)) {
+				this.possibleMoves.push([possibleRow, possibleCol]);
+			} else {
+				break;
+			}
+		}
+
+		possibleRow = this.row;
+		possibleCol = this.col;
+		while (possibleRow !== 7 && possibleCol !== 0) {
+			possibleRow += 1;
+			possibleCol -= 1;
+			if (board.isEmpty(possibleRow, possibleCol)) {
+				this.possibleMoves.push([possibleRow, possibleCol]);
+			} else {
+				break;
+			}
+		}
+
+		possibleRow = this.row;
+		possibleCol = this.col;
+		while (possibleRow !== 7 && possibleCol !== 7) {
+			possibleRow += 1;
+			possibleCol += 1;
+			if (board.isEmpty(possibleRow, possibleCol)) {
+				this.possibleMoves.push([possibleRow, possibleCol]);
+			} else {
+				break;
+			}
+		}
+	}
+
+	isValidMove(row, col) {
+		this.calculatePossibleMoves();
+		function compareArray(matrix) {
+			if (
+				matrix.find(
+					(element) => JSON.stringify(element) === JSON.stringify([row, col])
+				) &&
+				board.isEmpty()
+			)
+				return true;
+			return false;
+		}
+
+		if (compareArray(this.possibleMoves)) {
+			this.calculatePossibleMoves();
+			return true;
+		}
+		return false;
+	}
 }
 
 class Knight extends Piece {
@@ -164,7 +234,7 @@ class Rook extends Piece {
 					cells.push(board.getPiece(i, col));
 				}
 			}
-			if (cells.some(cell => cell)) {
+			if (cells.some((cell) => cell)) {
 				return false;
 			}
 			return true;
@@ -200,7 +270,10 @@ class Pawn extends Piece {
 			}
 		}
 		// Verifique se a nova posição é uma captura diagonal
-		else if (Math.abs(this.col - newCol) === 1 && board.isOpponent(newRow, newCol, this.color)) {
+		else if (
+			Math.abs(this.col - newCol) === 1 &&
+			board.isOpponent(newRow, newCol, this.color)
+		) {
 			// O peão só pode fazer uma captura diagonal
 			if (this.color === "white" && newRow === this.row + 1) {
 				return true;
