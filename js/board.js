@@ -20,7 +20,6 @@ class Board {
 
 	addMove(piece, from, to) {
 		this.moves.push({ piece: piece, from: from, to: to });
-		console.log(this.moves)
 	}
 
 	getLastMove() {
