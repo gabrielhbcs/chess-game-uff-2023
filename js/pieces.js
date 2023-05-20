@@ -308,4 +308,8 @@ class Pawn extends Piece {
 		// O movimento não é válido
 		return false;
 	}
+
+	isGoingToPromote(row) {
+		return row === 0 || row === 7;
+	}
 }
