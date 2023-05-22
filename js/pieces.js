@@ -61,7 +61,7 @@ class Bishop extends Piece {
 		while (possibleRow !== 0 && possibleCol !== 0) {
 			possibleRow -= 1;
 			possibleCol -= 1;
-			if (board.isEmpty(possibleRow, possibleCol)) {
+			if (board.isEmpty(possibleRow, possibleCol) || board.isOpponent(possibleRow, possibleCol)) {
 				this.possibleMoves.push([possibleRow, possibleCol]);
 			} else {
 				break;
@@ -73,7 +73,7 @@ class Bishop extends Piece {
 		while (possibleRow !== 0 && possibleCol !== 7) {
 			possibleRow -= 1;
 			possibleCol += 1;
-			if (board.isEmpty(possibleRow, possibleCol)) {
+			if (board.isEmpty(possibleRow, possibleCol) || board.isOpponent(possibleRow, possibleCol)) {
 				this.possibleMoves.push([possibleRow, possibleCol]);
 			} else {
 				break;
@@ -85,7 +85,7 @@ class Bishop extends Piece {
 		while (possibleRow !== 7 && possibleCol !== 0) {
 			possibleRow += 1;
 			possibleCol -= 1;
-			if (board.isEmpty(possibleRow, possibleCol)) {
+			if (board.isEmpty(possibleRow, possibleCol) || board.isOpponent(possibleRow, possibleCol)) {
 				this.possibleMoves.push([possibleRow, possibleCol]);
 			} else {
 				break;
@@ -97,7 +97,7 @@ class Bishop extends Piece {
 		while (possibleRow !== 7 && possibleCol !== 7) {
 			possibleRow += 1;
 			possibleCol += 1;
-			if (board.isEmpty(possibleRow, possibleCol)) {
+			if (board.isEmpty(possibleRow, possibleCol) || board.isOpponent(possibleRow, possibleCol)) {
 				this.possibleMoves.push([possibleRow, possibleCol]);
 			} else {
 				break;
