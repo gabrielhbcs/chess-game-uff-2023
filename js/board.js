@@ -99,6 +99,17 @@ class Board {
 		cell.innerHTML = "";
 	}
 
+	drawPossibleMovements(){
+		document.querySelectorAll(".possible").forEach(cell => cell.classList.remove("possible"))
+		if(selectedPiece){
+			let possibleCells = selectedPiece.getPossibleMovements(this)
+			possibleCells.forEach(cellIndexes => {
+				this.squares[cellIndexes[0]][cellIndexes[1]].classList.add("possible")
+			})
+		}
+
+	}
+
 	draw(parent) {
 
 		let table = document.createElement("table");
@@ -151,13 +162,12 @@ class Board {
 									selectedCell.classList.remove("selected");
 									selectedPiece = null;
 								}
-								
 								selectedPiece = pieceInCell;
 								selectedCell = target;
 							}
 						}
-					}
-
+						this.drawPossibleMovements()
+					}				
 				});
 
 				row.appendChild(cell);
@@ -165,7 +175,6 @@ class Board {
 			}
 			table.appendChild(row);
 		}
-
 		parent.appendChild(table);
 	}
 }
