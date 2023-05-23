@@ -21,9 +21,8 @@ class Board {
 		for (let piece of pieces) {
 			if (piece.row === row && piece.col === col) {
 				return false;
-			}
-		}
-
+			};
+		};
 		return true;
 	}
 
@@ -42,15 +41,14 @@ class Board {
 		for (let piece of pieces) {
 			if (piece.row === row && piece.col === col) {
 				return piece;
-			}
-		}
-
+			};
+		};
 		return null;
 	}
 
 	killPiece(row, col) {
-		let killedPiece = this.getPiece(row, col);
-		let cell = board.squares[row][col];
+		const killedPiece = this.getPiece(row, col);
+		const cell = board.squares[row][col];
 		cell.innerHTML = "";
 		pieces.pop(killedPiece);
 	}
@@ -87,8 +85,15 @@ class Board {
 			}	
 		}
 
-		selectedPiece.move(row, col);
+		// caso o pawn seja promovido
+		if (selectedPiece.type === 'pawn' && selectedPiece.isGoingToPromote(row)) {
+			const { color, row, col } = selectedPiece;
+			const newQueen = new Queen(color, row, col)
+			const newCell = this.squares[row][col];
+			newQueen.draw(newCell);
+		}
 
+		selectedPiece.move(row, col);
 		selectedCell.classList.remove("selected");
 		let square = board.squares[selectedPiece.row][selectedPiece.col];
 		selectedPiece.draw(square);
@@ -100,7 +105,6 @@ class Board {
 	}
 
 	draw(parent) {
-
 		let table = document.createElement("table");
 		table.className = "chessboard";
 		for (let i = 0; i < 8; i++) {
@@ -118,23 +122,23 @@ class Board {
 				cell.dataset.col = j;
 
 				cell.addEventListener("click", (event) => {
-					let target = event.target;
-
+					const { target } = event;
 					if (target.classList.contains("square")) {
-						let row = parseInt(target.dataset.row);
-						let col = parseInt(target.dataset.col);
+						
+						const row = parseInt(target.dataset.row);
+						const col = parseInt(target.dataset.col);
+						const pieceInCell = this.getPiece(row, col);
 
-						let pieceInCell = this.getPiece(row, col);
-						if (selectedCell && selectedCell != target) {
-							let _isValidMove = selectedPiece.isValidMove(row, col);
-							let _isOpponent = this.isOpponent(row, col)
-							if (_isValidMove && !pieceInCell) {
-								this.movePiece(row, col);
-							} else if (_isOpponent && _isValidMove) {
+						if (selectedCell && selectedCell !== target) {
+							const _isValidMove = selectedPiece.isValidMove(row, col);
+							const _isOpponent = this.isOpponent(row, col);
+							if (pieceInCell && _isOpponent && _isValidMove) {
 								this.killPiece(row, col);
 								this.movePiece(row, col);
 							}
-
+							else if (_isValidMove && !pieceInCell) {
+								this.movePiece(row, col);
+							}
 						}
 						if (selectedCell == target) {
 							selectedCell.classList.remove("selected");
@@ -156,8 +160,7 @@ class Board {
 								selectedCell = target;
 							}
 						}
-					}
-
+					};
 				});
 
 				row.appendChild(cell);
@@ -165,7 +168,6 @@ class Board {
 			}
 			table.appendChild(row);
 		}
-
 		parent.appendChild(table);
 	}
 }
