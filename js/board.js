@@ -60,7 +60,6 @@ class Board {
 		const filteredPieces = pieces.filter((piece) => piece !== killedPiece);
 
 		pieces = [ ...filteredPieces ];
-		console.log(row, col);
 		const cell = this.squares[row][col];
 		cell.innerHTML = "";
 	}

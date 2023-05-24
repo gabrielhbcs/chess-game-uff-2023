@@ -32,10 +32,6 @@ class Piece {
 		piece.style.userSelect = "none";
 		parent.appendChild(piece);
 	}
-
-	kill(parent) {
-		console.log(parent);
-	}
 }
 
 class King extends Piece {
