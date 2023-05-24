@@ -2,6 +2,7 @@ class Board {
 	constructor(element) {
 		this.element = element
 		this.squares = [];
+		this.moves = [];
 		for (let i = 0; i < 8; i++) {
 			this.squares[i] = [];
 			for (let j = 0; j < 8; j++) {
@@ -15,6 +16,14 @@ class Board {
 				this.squares[i][j] = square;
 			}
 		}
+	}
+
+	addMove(piece, from, to) {
+		this.moves.push({ piece: piece, from: from, to: to });
+	}
+
+	getLastMove() {
+		return this.moves.length > 0 ? this.moves[this.moves.length - 1] : null;
 	}
 
 	isEmpty(row, col) {
@@ -52,16 +61,49 @@ class Board {
 		let killedPiece = this.getPiece(row, col);
 		let cell = board.squares[row][col];
 		cell.innerHTML = "";
-		pieces.pop(killedPiece);
+		let index = pieces.indexOf(killedPiece);
+		if (index !== -1) {
+			pieces.splice(index, 1);
+		}
 	}
 
 	movePiece(row, col) {
 		let old_row = selectedPiece.row;
 		let old_col = selectedPiece.col;
+
+		//caso da jogada do roque
+		if (selectedPiece.type === 'king') {
+			//movimentação da torre
+			if (selectedPiece.isValidCastleMove(row, col)) {
+				let castleRook;
+				let castleRookCol;
+				//caso à esquera
+				if (col < old_col) {
+					if (selectedPiece.color === 'black') castleRook = this.getPiece(7, 0)
+					else castleRook = this.getPiece(0, 0)
+					castleRookCol = col + 1
+				}
+				//caso à direita
+				else {
+					if (selectedPiece.color === 'black') castleRook = this.getPiece(7, 7)
+					else castleRook = this.getPiece(0, 7)
+					castleRookCol = col - 1
+				}
+
+				//desenha e atualiza a posição da torre
+				let oldRookCell = board.squares[castleRook.row][castleRook.col];
+				castleRook.move(row, castleRookCol)
+				let newRookCell = board.squares[castleRook.row][castleRook.col];
+				castleRook.draw(newRookCell)
+				oldRookCell.innerHTML = "";
+			}
+		}
+
 		selectedPiece.move(row, col);
-		
+
 		selectedCell.classList.remove("selected");
 		let square = board.squares[selectedPiece.row][selectedPiece.col];
+		square.classList.remove("selected");
 		selectedPiece.draw(square);
 		selectedPiece = null;
 		selectedCell = null;
@@ -104,6 +146,7 @@ class Board {
 							} else if (_isOpponent && _isValidMove) {
 								this.killPiece(row, col);
 								this.movePiece(row, col);
+								pieceInCell = null
 							}
 
 						}
@@ -112,17 +155,17 @@ class Board {
 							selectedCell = null;
 							selectedPiece = null
 
-						}else if (!this.isEmpty(row, col) && pieceInCell) {
+						} else if (!this.isEmpty(row, col) && pieceInCell) {
 
 							if (pieceInCell.color === "white" && currentPlayer === "white" ||
 								pieceInCell.color === "black" && currentPlayer === "black") {
 								target.classList.add("selected")
-								
+
 								if (selectedCell && selectedCell !== target) {
 									selectedCell.classList.remove("selected");
 									selectedPiece = null;
 								}
-								
+
 								selectedPiece = pieceInCell;
 								selectedCell = target;
 							}
