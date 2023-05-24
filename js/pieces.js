@@ -278,7 +278,6 @@ class Pawn extends Piece {
 	}
 
 	isValidMove(newRow, newCol) {
-		console.log('sou pao');
 		// // // // // // // // // Verifique se a nova posição é uma casa vazia na mesma coluna
 		// // // // // // // // if (this.col === newCol && board.isEmpty(newRow, newCol)) {
 		// // // // // // // // 	// O peão pode se mover uma ou duas casas para frente na sua primeira jogada
@@ -316,17 +315,7 @@ class Pawn extends Piece {
 		return true;
 	}
 
-		// Verifica en passant
-		let lastMove = board.getLastMove();
-		if (lastMove && lastMove.piece instanceof Pawn && lastMove.to.row === this.row && Math.abs(lastMove.to.col - this.col) === 1 && Math.abs(lastMove.from.row - this.row) === 2) {
-			let capturedPawn = board.getPiece(lastMove.to.row, lastMove.to.col);
-			if (capturedPawn && capturedPawn.color !== this.color) {
-				board.killPiece(capturedPawn.row, capturedPawn.col);
-				return  true;
-			}
-		}
-
-		// O movimento não é válido
-		return false;
+	isGoingToPromote(row) {
+		return row === 0 || row === 7;
 	}
 }

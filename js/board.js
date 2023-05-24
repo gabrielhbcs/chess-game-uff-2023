@@ -99,10 +99,15 @@ class Board {
 
 		// caso o pawn seja promovido
 		if (selectedPiece.type === 'pawn' && selectedPiece.isGoingToPromote(row)) {
-			const { color, row, col } = selectedPiece;
-			const newQueen = new Queen(color, row, col)
-			const newCell = this.squares[row][col];
-			newQueen.draw(newCell);
+			const { color } = selectedPiece;
+			this.killPiece(row, col);
+			const cellForQueen = this.squares[row][col];
+			cellForQueen.innerHTML = "";
+
+			const newQueen = new Queen(color, row, col);
+			pieces.push(newQueen);
+			
+			newQueen.draw(cellForQueen);
 		}
 
 		selectedPiece.move(row, col);
@@ -141,6 +146,7 @@ class Board {
 						const row = parseInt(target.dataset.row);
 						const col = parseInt(target.dataset.col);
 						const pieceInCell = this.getPiece(row, col);
+						console.log(pieceInCell);
 
 						if (selectedCell && selectedCell !== target) {
 							const _isValidMove = selectedPiece.isValidMove(row, col);
