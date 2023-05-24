@@ -15,6 +15,7 @@ class Piece {
 	}
 
 	move(row, col) {
+		board.addMove(this, {row: this.row, col: this.col}, {row: row, col: col} )
 		this.row = row;
 		this.col = col;
 
@@ -46,15 +47,15 @@ class King extends Piece {
 	}
 
 	//mudança de comportamento para validação do roque
-	move(row, col){
-		if(!this.hasMoved) this.hasMoved = true
+	move(row, col) {
+		if (!this.hasMoved) this.hasMoved = true
 		super.move(row, col)
 	}
 
-	isValidMove(newRow, newCol){
+	isValidMove(newRow, newCol) {
 		//verifica se a posição escolhida está à uma cas de distância da posição atual
-		if(newRow === this.row || newRow === this.row - 1 || newRow === this.row + 1){
-			if(newCol === this.col || newCol === this.col - 1 || newCol === this.col + 1){
+		if (newRow === this.row || newRow === this.row - 1 || newRow === this.row + 1) {
+			if (newCol === this.col || newCol === this.col - 1 || newCol === this.col + 1) {
 				return true
 			}
 			//verifica se a posição escolhida é válida para o roque
@@ -64,34 +65,34 @@ class King extends Piece {
 	}
 
 	//valida a jogada do roque
-	isValidCastleMove(newRow, newCol){
-		if(newRow === this.row && !this.hasMoved){
+	isValidCastleMove(newRow, newCol) {
+		if (newRow === this.row && !this.hasMoved) {
 			//para a torre à direita
-			if(newCol === this.col + 2){
+			if (newCol === this.col + 2) {
 				let auxCol = this.col
-				while(auxCol <= 7){
+				while (auxCol <= 7) {
 					let pieceCheck = board.getPiece(this.row, ++auxCol)
 
-					if(pieceCheck && pieceCheck.type !== 'rook') return false
+					if (pieceCheck && pieceCheck.type !== 'rook') return false
 
-					if(pieceCheck && pieceCheck.type === 'rook'){
-						if(pieceCheck.hasMoved) return false
+					if (pieceCheck && pieceCheck.type === 'rook') {
+						if (pieceCheck.hasMoved) return false
 						return true
-					} 
+					}
 				}
 			}
 			//para a torre à esquerda
-			else if(newCol === this.col - 2){
+			else if (newCol === this.col - 2) {
 				let auxCol = this.col
-				while(auxCol >= 0){
+				while (auxCol >= 0) {
 					let pieceCheck = board.getPiece(this.row, --auxCol)
 
-					if(pieceCheck && pieceCheck.type !== 'rook') return false
+					if (pieceCheck && pieceCheck.type !== 'rook') return false
 
-					if(pieceCheck && pieceCheck.type === 'rook'){
-						if(pieceCheck.hasMoved) return false
+					if (pieceCheck && pieceCheck.type === 'rook') {
+						if (pieceCheck.hasMoved) return false
 						return true
-					} 
+					}
 				}
 			}
 		}
@@ -107,7 +108,7 @@ class Queen extends Piece {
 
 	isValidMove(newRow, newCol) {
 		// verificando se é a mesma posição
-		if(newRow === this.row && newCol === this.col) return false;
+		if (newRow === this.row && newCol === this.col) return false;
 		// verifique se o movimento é válido na vertical, horizontal ou diagonal
 		if (newRow === this.row || newCol === this.col || Math.abs(newRow - this.row) === Math.abs(newCol - this.col)) {
 			// determinando a direção (delta) do movimento (0 = parado)
@@ -123,11 +124,11 @@ class Queen extends Piece {
 			}
 			// não tem peças no caminho
 			return true;
-		  }
+		}
 		// caso contrário, movimento é inválido
 		return false
-		}
 	}
+}
 
 class Bishop extends Piece {
 	constructor(color, row, col) {
@@ -216,13 +217,13 @@ class Knight extends Piece {
 
 	isValidMove(targetRow, targetCol) {
 		if (targetCol === this.col + 2 || targetCol === this.col - 2) {
-			if (targetRow === this.row + 1 || targetRow === this.row -1 ) {
+			if (targetRow === this.row + 1 || targetRow === this.row - 1) {
 				return true;
 			}
 			return false;
 		}
-		else if(targetRow === this.row + 2 || targetRow === this.row - 2) {
-			if (targetCol === this.col + 1 || targetCol === this.col -1 ) {
+		else if (targetRow === this.row + 2 || targetRow === this.row - 2) {
+			if (targetCol === this.col + 1 || targetCol === this.col - 1) {
 				return true;
 			}
 			return false;
@@ -240,8 +241,8 @@ class Rook extends Piece {
 	}
 
 	//mudança de comportamento para validação do roque
-	move(row, col){
-		if(!this.hasMoved) this.hasMoved = true
+	move(row, col) {
+		if (!this.hasMoved) this.hasMoved = true
 		super.move(row, col)
 	}
 
@@ -315,7 +316,17 @@ class Pawn extends Piece {
 		return true;
 	}
 
-	isGoingToPromote(row) {
-		return row === 0 || row === 7;
+		// Verifica en passant
+		let lastMove = board.getLastMove();
+		if (lastMove && lastMove.piece instanceof Pawn && lastMove.to.row === this.row && Math.abs(lastMove.to.col - this.col) === 1 && Math.abs(lastMove.from.row - this.row) === 2) {
+			let capturedPawn = board.getPiece(lastMove.to.row, lastMove.to.col);
+			if (capturedPawn && capturedPawn.color !== this.color) {
+				board.killPiece(capturedPawn.row, capturedPawn.col);
+				return  true;
+			}
+		}
+
+		// O movimento não é válido
+		return false;
 	}
 }
