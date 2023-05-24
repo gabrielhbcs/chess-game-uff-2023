@@ -278,9 +278,6 @@ class Pawn extends Piece {
 	}
 
 	isValidMove(newRow, newCol) {
-		if (newRow === 7) {
-			return true;
-		}
 		// Verifique se a nova posição é uma casa vazia na mesma coluna
 		if (this.col === newCol && board.isEmpty(newRow, newCol)) {
 			// O peão pode se mover uma ou duas casas para frente na sua primeira jogada
