@@ -278,41 +278,43 @@ class Pawn extends Piece {
 	}
 
 	isValidMove(newRow, newCol) {
-		// // // // // // // // // Verifique se a nova posição é uma casa vazia na mesma coluna
-		// // // // // // // // if (this.col === newCol && board.isEmpty(newRow, newCol)) {
-		// // // // // // // // 	// O peão pode se mover uma ou duas casas para frente na sua primeira jogada
-		// // // // // // // // 	if (this.color === "white") {
-		// // // // // // // // 		if (this.row === 1 && newRow === 3) {
-		// // // // // // // // 			return true;
-		// // // // // // // // 		}
-		// // // // // // // // 		if (newRow === this.row + 1) {
-		// // // // // // // // 			return true;
-		// // // // // // // // 		}
-		// // // // // // // // 	} else {
-		// // // // // // // // 		if (this.row === 6 && newRow === 4) {
-		// // // // // // // // 			return true;
-		// // // // // // // // 		}
-		// // // // // // // // 		if (newRow === this.row - 1) {
-		// // // // // // // // 			return true;
-		// // // // // // // // 		}
-		// // // // // // // // 	}
-		// // // // // // // // }
-		// // // // // // // // // Verifique se a nova posição é uma captura diagonal
-		// // // // // // // // else if (
-		// // // // // // // // 	Math.abs(this.col - newCol) === 1 &&
-		// // // // // // // // 	board.isOpponent(newRow, newCol, this.color)
-		// // // // // // // // ) {
-		// // // // // // // // 	// O peão só pode fazer uma captura diagonal
-		// // // // // // // // 	if (this.color === "white" && newRow === this.row + 1) {
-		// // // // // // // // 		return true;
-		// // // // // // // // 	} else if (this.color === "black" && newRow === this.row - 1) {
-		// // // // // // // // 		return true;
-		// // // // // // // // 	}
-		// // // // // // // // }
+		if (newRow === 7) {
+			return true;
+		}
+		// Verifique se a nova posição é uma casa vazia na mesma coluna
+		if (this.col === newCol && board.isEmpty(newRow, newCol)) {
+			// O peão pode se mover uma ou duas casas para frente na sua primeira jogada
+			if (this.color === "white") {
+				if (this.row === 1 && newRow === 3) {
+					return true;
+				}
+				if (newRow === this.row + 1) {
+					return true;
+				}
+			} else {
+				if (this.row === 6 && newRow === 4) {
+					return true;
+				}
+				if (newRow === this.row - 1) {
+					return true;
+				}
+			}
+		}
+		// Verifique se a nova posição é uma captura diagonal
+		else if (
+			Math.abs(this.col - newCol) === 1 &&
+			board.isOpponent(newRow, newCol, this.color)
+		) {
+			// O peão só pode fazer uma captura diagonal
+			if (this.color === "white" && newRow === this.row + 1) {
+				return true;
+			} else if (this.color === "black" && newRow === this.row - 1) {
+				return true;
+			}
+		}
 
-		// // // // // // // // // O movimento não é válido
-		// // // // // // // // return false;
-		return true;
+		// O movimento não é válido
+		return false;
 	}
 
 	isGoingToPromote(row) {
