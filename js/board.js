@@ -64,6 +64,17 @@ class Board {
 		cell.innerHTML = "";
 	}
 
+	getAllPossibleMovements(){
+		let allPossibleMovements = []
+		pieces.forEach(piece => {
+			allPossibleMovements.push({
+				piece: piece,
+				possibleMovements: piece.getPossibleMovements(this)
+			})
+		})
+		return allPossibleMovements
+	}
+
 	movePiece(newRow, newCol) {
 		const { row, col, color, type } = selectedPiece;
 		const oldPieceCell = this.squares[row][col];
@@ -120,6 +131,17 @@ class Board {
 		oldPieceCell.innerHTML = "";
 	}
 
+	drawPossibleMovements(){
+		document.querySelectorAll(".possible").forEach(cell => cell.classList.remove("possible"))
+		if(selectedPiece){
+			let possibleCells = selectedPiece.getPossibleMovements(this)
+			possibleCells.forEach(cellIndexes => {
+				this.squares[cellIndexes[0]][cellIndexes[1]].classList.add("possible")
+			})
+		}
+
+	}
+
 	draw(parent) {
 		let table = document.createElement("table");
 		table.className = "chessboard";
@@ -171,12 +193,14 @@ class Board {
 									selectedCell.classList.remove("selected");
 									selectedPiece = null;
 								}
-
 								selectedPiece = pieceInCell;
 								selectedCell = target;
 							}
 						}
+						this.drawPossibleMovements()
+			
 					};
+
 				});
 
 				row.appendChild(cell);
