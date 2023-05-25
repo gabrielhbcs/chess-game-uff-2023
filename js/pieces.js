@@ -29,6 +29,18 @@ class Piece {
 		}
 	}
 
+	getPossibleMovements(board){
+		let availablePositions = []
+		board.squares.forEach((row, rowIndex) => {
+			row.forEach((col, colIndex) => {
+				if((board.isEmpty(rowIndex, colIndex) || board.isOpponent(rowIndex, colIndex)) && this.isValidMove(rowIndex, colIndex)){
+					availablePositions.push([rowIndex, colIndex])
+				}
+			})
+		})
+		return availablePositions
+	}
+
 	draw(parent) {
 		let piece = document.createElement("div");
 		piece.className = "piece";
