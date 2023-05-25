@@ -4,6 +4,11 @@
   --board-width: calc(var(--num-squares) * var(--square-length));
   --board-height: calc(var(--num-squares) * var(--square-length));
 }
+div#board {
+  display: flex;
+  justify-content: center;
+  margin-top: 100px;
+}
 
 table.chessboard {
   border-collapse: collapse;
@@ -51,5 +56,22 @@ table.chessboard {
   height: 100%;
   top: 0;
   left: 0;
+
+nav {
+  background: #01022f;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  left: 0;
+  display: flex;
+  align-items: center;
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+a.navbar-btn {
+  text-decoration: none;
+  padding: 24px 48px;
+  display: block;
+  color: #fafafa;
 }
 /* ... outras classes para as demais peças do xadrez */
