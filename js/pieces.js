@@ -307,16 +307,20 @@ class Pawn extends Piece {
 		}
 
 		// Verifica en passant
-		let lastMove = board.getLastMove();
+		const lastMove = board.getLastMove();
 		if (lastMove && lastMove.piece instanceof Pawn && lastMove.to.row === this.row && Math.abs(lastMove.to.col - this.col) === 1 && Math.abs(lastMove.from.row - this.row) === 2) {
-			let capturedPawn = board.getPiece(lastMove.to.row, lastMove.to.col);
+			const capturedPawn = board.getPiece(lastMove.to.row, lastMove.to.col);
 			if (capturedPawn && capturedPawn.color !== this.color) {
 				board.killPiece(capturedPawn.row, capturedPawn.col);
 				return  true;
 			}
-		}
+		};
 
 		// O movimento não é válido
 		return false;
+	}
+
+	isGoingToPromote(row) {
+		return row === 0 || row === 7;
 	}
 }

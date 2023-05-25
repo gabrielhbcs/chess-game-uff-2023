@@ -30,9 +30,8 @@ class Board {
 		for (let piece of pieces) {
 			if (piece.row === row && piece.col === col) {
 				return false;
-			}
-		}
-
+			};
+		};
 		return true;
 	}
 
@@ -51,69 +50,77 @@ class Board {
 		for (let piece of pieces) {
 			if (piece.row === row && piece.col === col) {
 				return piece;
-			}
-		}
-
+			};
+		};
 		return null;
 	}
 
 	killPiece(row, col) {
-		let killedPiece = this.getPiece(row, col);
-		let cell = board.squares[row][col];
+		const killedPiece = this.getPiece(row, col);
+		const filteredPieces = pieces.filter((piece) => piece !== killedPiece);
+
+		pieces = [ ...filteredPieces ];
+		const cell = this.squares[row][col];
 		cell.innerHTML = "";
-		let index = pieces.indexOf(killedPiece);
-		if (index !== -1) {
-			pieces.splice(index, 1);
-		}
 	}
 
-	movePiece(row, col) {
-		let old_row = selectedPiece.row;
-		let old_col = selectedPiece.col;
+	movePiece(newRow, newCol) {
+		const { row, col, color, type } = selectedPiece;
+		const oldPieceCell = this.squares[row][col];
 
 		//caso da jogada do roque
-		if (selectedPiece.type === 'king') {
+		if (type === 'king') {
 			//movimentação da torre
-			if (selectedPiece.isValidCastleMove(row, col)) {
+			if (selectedPiece.isValidCastleMove(newRow, newCol)) {
 				let castleRook;
 				let castleRookCol;
 				//caso à esquera
-				if (col < old_col) {
+				if (newCol < col) {
 					if (selectedPiece.color === 'black') castleRook = this.getPiece(7, 0)
 					else castleRook = this.getPiece(0, 0)
-					castleRookCol = col + 1
+					castleRookCol = newCol + 1
 				}
 				//caso à direita
 				else {
 					if (selectedPiece.color === 'black') castleRook = this.getPiece(7, 7)
 					else castleRook = this.getPiece(0, 7)
-					castleRookCol = col - 1
+					castleRookCol = newCol - 1
 				}
 
 				//desenha e atualiza a posição da torre
-				let oldRookCell = board.squares[castleRook.row][castleRook.col];
+				const oldRookCell = this.squares[castleRook.row][castleRook.col];
 				castleRook.move(row, castleRookCol)
-				let newRookCell = board.squares[castleRook.row][castleRook.col];
+				const newRookCell = this.squares[castleRook.row][castleRook.col];
 				castleRook.draw(newRookCell)
 				oldRookCell.innerHTML = "";
 			}
 		}
 
-		selectedPiece.move(row, col);
+		// caso o pawn seja promovido
+		if (type === 'pawn' && selectedPiece.isGoingToPromote(newRow)) {
+			this.killPiece(row, col);
 
+			const cellForQueen = this.squares[newRow][newCol];
+			cellForQueen.innerHTML = "";
+
+			const newQueen = new Queen(color, newRow, newCol);
+			pieces.push(newQueen);
+			
+			newQueen.draw(cellForQueen);
+		} else {
+			selectedPiece.move(newRow, newCol);
+			selectedPiece.draw(this.squares[newRow][newCol]);
+			selectedPiece = null;
+		}
+
+		oldPieceCell.classList.remove("selected");
 		selectedCell.classList.remove("selected");
-		let square = board.squares[selectedPiece.row][selectedPiece.col];
-		square.classList.remove("selected");
-		selectedPiece.draw(square);
-		selectedPiece = null;
-		selectedCell = null;
 
-		let cell = board.squares[old_row][old_col];
-		cell.innerHTML = "";
+		selectedCell = null;
+		oldPieceCell.innerHTML = "";
 	}
 
 	draw(parent) {
-
 		let table = document.createElement("table");
 		table.className = "chessboard";
 		for (let i = 0; i < 8; i++) {
@@ -131,24 +138,24 @@ class Board {
 				cell.dataset.col = j;
 
 				cell.addEventListener("click", (event) => {
-					let target = event.target;
-
+					const { target } = event;
 					if (target.classList.contains("square")) {
-						let row = parseInt(target.dataset.row);
-						let col = parseInt(target.dataset.col);
-
+						
+						const row = parseInt(target.dataset.row);
+						const col = parseInt(target.dataset.col);
 						let pieceInCell = this.getPiece(row, col);
-						if (selectedCell && selectedCell != target) {
-							let _isValidMove = selectedPiece.isValidMove(row, col);
-							let _isOpponent = this.isOpponent(row, col)
-							if (_isValidMove && !pieceInCell) {
-								this.movePiece(row, col);
-							} else if (_isOpponent && _isValidMove) {
+
+						if (selectedCell && selectedCell !== target) {
+							const _isValidMove = selectedPiece.isValidMove(row, col);
+							const _isOpponent = this.isOpponent(row, col);
+							if (pieceInCell && _isOpponent && _isValidMove) {
 								this.killPiece(row, col);
 								this.movePiece(row, col);
 								pieceInCell = null
 							}
-
+							else if (_isValidMove && !pieceInCell) {
+								this.movePiece(row, col);
+							}
 						}
 						if (selectedCell == target) {
 							selectedCell.classList.remove("selected");
@@ -156,7 +163,6 @@ class Board {
 							selectedPiece = null
 
 						} else if (!this.isEmpty(row, col) && pieceInCell) {
-
 							if (pieceInCell.color === "white" && currentPlayer === "white" ||
 								pieceInCell.color === "black" && currentPlayer === "black") {
 								target.classList.add("selected")
@@ -170,8 +176,7 @@ class Board {
 								selectedCell = target;
 							}
 						}
-					}
-
+					};
 				});
 
 				row.appendChild(cell);
@@ -179,7 +184,6 @@ class Board {
 			}
 			table.appendChild(row);
 		}
-
 		parent.appendChild(table);
 	}
 }
