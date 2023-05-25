@@ -19,8 +19,14 @@ class Piece {
 		this.row = row;
 		this.col = col;
 
-		// por enquanto só as peças pretas jogam
 		currentPlayer = currentPlayer === "white" ? "black" : "white";
+
+		// Atualização da UI para mostrar o atual jogador
+		if (currentPlayer === "black") {
+			document.getElementById('turnDisplay').textContent = "Turno Atual: Preto ♚";
+		} else {
+			document.getElementById('turnDisplay').textContent = "Turno Atual: Branco ♔";
+		}
 	}
 
 	draw(parent) {
@@ -32,6 +38,7 @@ class Piece {
 		piece.style.userSelect = "none";
 		parent.appendChild(piece);
 	}
+
 }
 
 class King extends Piece {

@@ -59,4 +59,11 @@ a.navbar-btn {
   display: block;
   color: #fafafa;
 }
+
+#turnDisplay {
+  color: #fafafa;
+  font-weight: bold;
+  margin-left: auto;
+  padding-right: 48px;
+}
 /* ... outras classes para as demais peças do xadrez */
