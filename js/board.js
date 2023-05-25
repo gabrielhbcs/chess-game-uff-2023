@@ -55,6 +55,17 @@ class Board {
 		pieces.pop(killedPiece);
 	}
 
+	getAllPossibleMovements(){
+		let allPossibleMovements = []
+		pieces.forEach(piece => {
+			allPossibleMovements.push({
+				piece: piece,
+				possibleMovements: piece.getPossibleMovements(this)
+			})
+		})
+		return allPossibleMovements
+	}
+
 	movePiece(row, col) {
 		let old_row = selectedPiece.row;
 		let old_col = selectedPiece.col;
