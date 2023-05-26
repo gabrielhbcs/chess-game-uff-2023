@@ -1,7 +1,7 @@
 class Board {
 	constructor(element) {
-		this.states = new States();
 		this.element = element
+		this.currentPlayer = 'white'
 		this.squares = [];
 		for (let i = 0; i < 8; i++) {
 			this.squares[i] = [];
@@ -17,6 +17,14 @@ class Board {
 			}
 		}
 	}
+
+	switchTurn(){
+        if (this.currentPlayer === 'white') {
+            this.currentPlayer = 'black';
+        } else {
+            this.currentPlayer = 'white';
+        }
+    }
 
 	isEmpty(row, col) {
 		for (let piece of pieces) {
@@ -144,8 +152,8 @@ class Board {
 
 						}else if (!this.isEmpty(row, col) && pieceInCell) {
 							console.log('@')
-							if (pieceInCell.color === "white" && this.states.currentPlayer === "white" ||
-								pieceInCell.color === "black" && this.states.currentPlayer === "black") {
+							if (pieceInCell.color === "white" && this.currentPlayer === "white" ||
+								pieceInCell.color === "black" && this.currentPlayer === "black") {
 								target.classList.add("selected")
 								
 								if (selectedCell && selectedCell !== target) {
@@ -155,7 +163,7 @@ class Board {
 								
 								selectedPiece = pieceInCell;
 								selectedCell = target;
-								this.states.switchTurn()
+								this.switchTurn()
 							}
 						}
 					}
