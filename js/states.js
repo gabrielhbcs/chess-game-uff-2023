@@ -31,3 +31,4 @@ class States {
         //faz um calculo de acordo com o historico de jogadas e diz se ocorreu um empate
     }
 }
+
