@@ -50,6 +50,7 @@ class King extends Piece {
 	constructor(color, row, col) {
 		super(color, row, col);
 		this.type = "king";
+		this.value = 99
 		// atributo para validação do roque
 		this.hasMoved = false;
 	}
@@ -112,6 +113,7 @@ class Queen extends Piece {
 	constructor(color, row, col) {
 		super(color, row, col);
 		this.type = "queen";
+		this.value = 9
 	}
 
 	isValidMove(newRow, newCol) {
@@ -142,6 +144,7 @@ class Bishop extends Piece {
 	constructor(color, row, col) {
 		super(color, row, col);
 		this.type = "bishop";
+		this.value = 3
 	}
 
 	possibleMoves = [];
@@ -221,6 +224,7 @@ class Knight extends Piece {
 	constructor(color, row, col) {
 		super(color, row, col);
 		this.type = "knight";
+		this.value = 3
 	}
 
 	isValidMove(targetRow, targetCol) {
@@ -244,6 +248,7 @@ class Rook extends Piece {
 	constructor(color, row, col) {
 		super(color, row, col);
 		this.type = "rook";
+		this.value = 5
 		//atributo para a validação do roque
 		this.hasMoved = false;
 	}
@@ -283,6 +288,7 @@ class Pawn extends Piece {
 	constructor(color, row, col) {
 		super(color, row, col);
 		this.type = "pawn";
+		this.value = 1
 	}
 
 	isValidMove(newRow, newCol) {
