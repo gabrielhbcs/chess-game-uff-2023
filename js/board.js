@@ -100,7 +100,9 @@ class Board {
 
 				//desenha e atualiza a posição da torre
 				const oldRookCell = this.squares[castleRook.row][castleRook.col];
-				castleRook.move(row, castleRookCol)
+				// o move não pode ser chamado
+				castleRook.row = row
+				castleRook.col = castleRookCol
 				const newRookCell = this.squares[castleRook.row][castleRook.col];
 				castleRook.draw(newRookCell)
 				oldRookCell.innerHTML = "";
