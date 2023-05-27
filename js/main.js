@@ -13,4 +13,5 @@ window.onload = function() {
 		e.preventDefault();
 		alert('perdeu baibe');
 	})
+	board.playAI();
 }

@@ -18,6 +18,11 @@ class Board {
 		}
 	}
 
+	playAI() {
+		this.setAllPossibleMovements();
+		computer.chooseMove(this.allPossibleMovements);
+	}
+
 	addMove(piece, from, to) {
 		this.moves.push({ piece: piece, from: from, to: to });
 	}
@@ -119,6 +124,8 @@ class Board {
 		} else {
 			selectedPiece.move(newRow, newCol);
 			selectedPiece.draw(this.squares[newRow][newCol]);
+			
+			if (currentPlayer === "white") computer.chooseMove(board.allPossibleMovements);
 			selectedPiece = null;
 		}
 
@@ -148,6 +155,7 @@ class Board {
 			this.squares[i] = [];
 			for (let j = 0; j < 8; j++) {
 				let cell = document.createElement("td");
+				cell.id = i.toString() + j.toString();
 				cell.className = "square";
 				if ((i + j) % 2 == 0) {
 					cell.classList.add("white");
