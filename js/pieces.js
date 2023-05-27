@@ -19,8 +19,6 @@ class Piece {
 		this.row = row;
 		this.col = col;
 
-		// por enquanto só as peças pretas jogam
-		currentPlayer = currentPlayer === "white" ? "black" : "white";
 	}
 
 	getPossibleMovements(board){

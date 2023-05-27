@@ -3,6 +3,8 @@ class Board {
 		this.element = element
 		this.squares = [];
 		this.moves = [];
+		this.currentPlayer = 'white'
+		this.allPossibleMovements = []
 		for (let i = 0; i < 8; i++) {
 			this.squares[i] = [];
 			for (let j = 0; j < 8; j++) {
@@ -16,6 +18,16 @@ class Board {
 				this.squares[i][j] = square;
 			}
 		}
+	}
+
+	switchTurn(){
+        if (this.currentPlayer === 'white') {
+            this.currentPlayer = 'black';
+        } else {
+            this.currentPlayer = 'white';
+        }
+		this.getAllPossibleMovements();
+		//this.isCheck(this.allPossibleMovements);
 	}
 
 	addMove(piece, from, to) {
@@ -72,7 +84,7 @@ class Board {
 				possibleMovements: piece.getPossibleMovements(this)
 			})
 		})
-		return allPossibleMovements
+		this.allPossibleMovements = allPossibleMovements;
 	}
 
 	movePiece(newRow, newCol) {
@@ -122,6 +134,7 @@ class Board {
 			selectedPiece.move(newRow, newCol);
 			selectedPiece.draw(this.squares[newRow][newCol]);
 			selectedPiece = null;
+			this.switchTurn();
 		}
 
 		oldPieceCell.classList.remove("selected");
@@ -185,8 +198,8 @@ class Board {
 							selectedPiece = null
 
 						} else if (!this.isEmpty(row, col) && pieceInCell) {
-							if (pieceInCell.color === "white" && currentPlayer === "white" ||
-								pieceInCell.color === "black" && currentPlayer === "black") {
+							if (pieceInCell.color === "white" && this.currentPlayer === "white" ||
+								pieceInCell.color === "black" && this.currentPlayer === "black") {
 								target.classList.add("selected")
 
 								if (selectedCell && selectedCell !== target) {
