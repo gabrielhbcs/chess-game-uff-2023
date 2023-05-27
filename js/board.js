@@ -35,10 +35,11 @@ class Board {
 		return true;
 	}
 
-	isOpponent(row, col) {
+	isOpponent(row, col, color) {
+		// verifica se a peça em row, col é inimiga de "color"
 		let piece = this.getPiece(row, col);
-		if (selectedPiece && piece)
-			return !(piece.color == selectedPiece.color);
+		if (color && piece)
+			return !(piece.color == color);
 		return false;
 	}
 
@@ -64,15 +65,12 @@ class Board {
 		cell.innerHTML = "";
 	}
 
-	getAllPossibleMovements(){
-		let allPossibleMovements = []
+	setAllPossibleMovements(){
+		this.allPossibleMovements = []
 		pieces.forEach(piece => {
-			allPossibleMovements.push({
-				piece: piece,
-				possibleMovements: piece.getPossibleMovements(this)
-			})
+			this.allPossibleMovements = this.allPossibleMovements.concat(piece.getPossibleMovements(this));
 		})
-		return allPossibleMovements
+		console.log(this.allPossibleMovements);
 	}
 
 	movePiece(newRow, newCol) {
@@ -135,8 +133,8 @@ class Board {
 		document.querySelectorAll(".possible").forEach(cell => cell.classList.remove("possible"))
 		if(selectedPiece){
 			let possibleCells = selectedPiece.getPossibleMovements(this)
-			possibleCells.forEach(cellIndexes => {
-				this.squares[cellIndexes[0]][cellIndexes[1]].classList.add("possible")
+			possibleCells.forEach(move => {
+				this.squares[move.to.row][move.to.col].classList.add("possible")
 			})
 		}
 
@@ -169,8 +167,9 @@ class Board {
 
 						if (selectedCell && selectedCell !== target) {
 							const _isValidMove = selectedPiece.isValidMove(row, col);
-							const _isOpponent = this.isOpponent(row, col);
+							const _isOpponent = this.isOpponent(row, col, selectedPiece.color);
 							if (pieceInCell && _isOpponent && _isValidMove) {
+								console.log("teste")
 								this.killPiece(row, col);
 								this.movePiece(row, col);
 								pieceInCell = null

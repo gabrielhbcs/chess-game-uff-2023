@@ -7,11 +7,31 @@ const pieceEmoji = {
 	pawn: { white: "♙", black: "♟︎" },
 };
 
+class Position {
+	constructor(row, col) {
+		this.row = row;
+		this.col = col;
+	}
+}
+
+class Move {
+	constructor(piece, from, to, target) {
+		this.piece = piece;
+		this.from = from;
+		this.to = to;
+		this.target = target; 
+	}
+}
+
 class Piece {
 	constructor(color, row, col) {
 		this.color = color;
 		this.row = row;
 		this.col = col;
+	}
+
+	getEnemyColor() {
+		return this.color === "white" ? "black" : "white";
 	}
 
 	move(row, col) {
@@ -21,18 +41,19 @@ class Piece {
 
 		// por enquanto só as peças pretas jogam
 		currentPlayer = currentPlayer === "white" ? "black" : "white";
+		board.setAllPossibleMovements();
 	}
 
 	getPossibleMovements(board){
-		let availablePositions = []
+		let availableMoves = []
 		board.squares.forEach((row, rowIndex) => {
 			row.forEach((col, colIndex) => {
-				if((board.isEmpty(rowIndex, colIndex) || board.isOpponent(rowIndex, colIndex)) && this.isValidMove(rowIndex, colIndex)){
-					availablePositions.push([rowIndex, colIndex])
+				if((board.isEmpty(rowIndex, colIndex) || board.isOpponent(rowIndex, colIndex, this.color)) && this.isValidMove(rowIndex, colIndex)){
+					availableMoves.push(new Move(this, new Position(this.row, this.col), new Position(rowIndex, colIndex), board.getPiece(rowIndex, colIndex)))
 				}
 			})
 		})
-		return availablePositions
+		return availableMoves
 	}
 
 	draw(parent) {
@@ -152,7 +173,7 @@ class Bishop extends Piece {
 		while (possibleRow !== 0 && possibleCol !== 0) {
 			possibleRow -= 1;
 			possibleCol -= 1;
-			if (board.isEmpty(possibleRow, possibleCol) || board.isOpponent(possibleRow, possibleCol)) {
+			if (board.isEmpty(possibleRow, possibleCol) || board.isOpponent(possibleRow, possibleCol, this.color)) {
 				this.possibleMoves.push([possibleRow, possibleCol]);
 			} else {
 				break;
@@ -164,7 +185,7 @@ class Bishop extends Piece {
 		while (possibleRow !== 0 && possibleCol !== 7) {
 			possibleRow -= 1;
 			possibleCol += 1;
-			if (board.isEmpty(possibleRow, possibleCol) || board.isOpponent(possibleRow, possibleCol)) {
+			if (board.isEmpty(possibleRow, possibleCol) || board.isOpponent(possibleRow, possibleCol, this.color)) {
 				this.possibleMoves.push([possibleRow, possibleCol]);
 			} else {
 				break;
@@ -176,7 +197,7 @@ class Bishop extends Piece {
 		while (possibleRow !== 7 && possibleCol !== 0) {
 			possibleRow += 1;
 			possibleCol -= 1;
-			if (board.isEmpty(possibleRow, possibleCol) || board.isOpponent(possibleRow, possibleCol)) {
+			if (board.isEmpty(possibleRow, possibleCol) || board.isOpponent(possibleRow, possibleCol, this.color)) {
 				this.possibleMoves.push([possibleRow, possibleCol]);
 			} else {
 				break;
@@ -188,7 +209,7 @@ class Bishop extends Piece {
 		while (possibleRow !== 7 && possibleCol !== 7) {
 			possibleRow += 1;
 			possibleCol += 1;
-			if (board.isEmpty(possibleRow, possibleCol) || board.isOpponent(possibleRow, possibleCol)) {
+			if (board.isEmpty(possibleRow, possibleCol) || board.isOpponent(possibleRow, possibleCol, this.color)) {
 				this.possibleMoves.push([possibleRow, possibleCol]);
 			} else {
 				break;
