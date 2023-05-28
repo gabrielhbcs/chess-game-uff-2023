@@ -1,9 +1,9 @@
 class Board {
 	constructor(element) {
 		this.element = element
+		this.currentPlayer = 'white'
 		this.squares = [];
 		this.moves = [];
-		this.currentPlayer = 'white'
 		this.allPossibleMovements = []
 		for (let i = 0; i < 8; i++) {
 			this.squares[i] = [];
@@ -134,12 +134,12 @@ class Board {
 			selectedPiece.move(newRow, newCol);
 			selectedPiece.draw(this.squares[newRow][newCol]);
 			selectedPiece = null;
-			this.switchTurn();
 		}
-
+		this.switchTurn();
+		
 		oldPieceCell.classList.remove("selected");
 		selectedCell.classList.remove("selected");
-
+		
 		selectedCell = null;
 		oldPieceCell.innerHTML = "";
 	}
@@ -196,7 +196,7 @@ class Board {
 							selectedCell.classList.remove("selected");
 							selectedCell = null;
 							selectedPiece = null
-
+							
 						} else if (!this.isEmpty(row, col) && pieceInCell) {
 							if (pieceInCell.color === "white" && this.currentPlayer === "white" ||
 								pieceInCell.color === "black" && this.currentPlayer === "black") {
@@ -208,6 +208,7 @@ class Board {
 								}
 								selectedPiece = pieceInCell;
 								selectedCell = target;
+								
 							}
 						}
 						this.drawPossibleMovements()
