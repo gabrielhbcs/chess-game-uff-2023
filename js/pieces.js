@@ -38,10 +38,6 @@ class Piece {
 		board.addMove(this, {row: this.row, col: this.col}, {row: row, col: col} )
 		this.row = row;
 		this.col = col;
-
-		// por enquanto só as peças pretas jogam
-		currentPlayer = currentPlayer === "white" ? "black" : "white";
-		board.setAllPossibleMovements();
 	}
 
 	getPossibleMovements(board){

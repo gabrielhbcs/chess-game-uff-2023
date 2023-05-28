@@ -8,6 +8,7 @@ class ComputerAI {
         let allComputerMovements = allPossibleMovements.filter(x => x.piece.color === this.color);
 
         let movement = allComputerMovements[Math.floor(Math.random() * allComputerMovements.length)];
+        if (!movement) return;
         console.log(movement)
 
         this.suggestMove(movement);
@@ -25,6 +26,7 @@ class ComputerAI {
             cancelable: true,
             view: window
           });
+        console.log(Date.now())
         cell.dispatchEvent(clickEvent);
     }
 

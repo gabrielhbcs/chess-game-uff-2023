@@ -1,7 +1,7 @@
 let currentPlayer = "white";
+let board = new Board(this);
 let selectedPiece = null;
 let selectedCell = null;
-let board = new Board(this);
 computer = new ComputerAI();
 let pieces = [
     new Rook("white", 0, 0),

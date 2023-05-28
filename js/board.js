@@ -1,8 +1,10 @@
 class Board {
 	constructor(element) {
 		this.element = element
+		this.currentPlayer = 'white'
 		this.squares = [];
 		this.moves = [];
+		this.allPossibleMovements = []
 		for (let i = 0; i < 8; i++) {
 			this.squares[i] = [];
 			for (let j = 0; j < 8; j++) {
@@ -21,6 +23,12 @@ class Board {
 	playAI() {
 		this.setAllPossibleMovements();
 		computer.chooseMove(this.allPossibleMovements);
+	}
+
+	switchTurn(){
+        this.currentPlayer = this.currentPlayer === "white" ? "black" : "white"
+
+		if (this.currentPlayer === "white") this.playAI();
 	}
 
 	addMove(piece, from, to) {
@@ -125,15 +133,15 @@ class Board {
 			selectedPiece.move(newRow, newCol);
 			selectedPiece.draw(this.squares[newRow][newCol]);
 			
-			if (currentPlayer === "white") computer.chooseMove(board.allPossibleMovements);
 			selectedPiece = null;
 		}
-
+		
 		oldPieceCell.classList.remove("selected");
 		selectedCell.classList.remove("selected");
-
+		
 		selectedCell = null;
 		oldPieceCell.innerHTML = "";
+		this.switchTurn();
 	}
 
 	drawPossibleMovements(){
@@ -177,12 +185,13 @@ class Board {
 							const _isValidMove = selectedPiece.isValidMove(row, col);
 							const _isOpponent = this.isOpponent(row, col, selectedPiece.color);
 							if (pieceInCell && _isOpponent && _isValidMove) {
-								console.log("teste")
+								console.log("teste1")
 								this.killPiece(row, col);
 								this.movePiece(row, col);
 								pieceInCell = null
 							}
 							else if (_isValidMove && !pieceInCell) {
+								console.log("teste2")
 								this.movePiece(row, col);
 							}
 						}
@@ -190,10 +199,10 @@ class Board {
 							selectedCell.classList.remove("selected");
 							selectedCell = null;
 							selectedPiece = null
-
+							
 						} else if (!this.isEmpty(row, col) && pieceInCell) {
-							if (pieceInCell.color === "white" && currentPlayer === "white" ||
-								pieceInCell.color === "black" && currentPlayer === "black") {
+							if (pieceInCell.color === "white" && this.currentPlayer === "white" ||
+								pieceInCell.color === "black" && this.currentPlayer === "black") {
 								target.classList.add("selected")
 
 								if (selectedCell && selectedCell !== target) {
@@ -202,6 +211,7 @@ class Board {
 								}
 								selectedPiece = pieceInCell;
 								selectedCell = target;
+								
 							}
 						}
 						this.drawPossibleMovements()
