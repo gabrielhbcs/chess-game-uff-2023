@@ -19,8 +19,18 @@ class Piece {
 		this.row = row;
 		this.col = col;
 
-		// por enquanto só as peças pretas jogam
-		currentPlayer = currentPlayer === "white" ? "black" : "white";
+	}
+
+	getPossibleMovements(board){
+		let availablePositions = []
+		board.squares.forEach((row, rowIndex) => {
+			row.forEach((col, colIndex) => {
+				if((board.isEmpty(rowIndex, colIndex) || board.isOpponent(rowIndex, colIndex)) && this.isValidMove(rowIndex, colIndex)){
+					availablePositions.push([rowIndex, colIndex])
+				}
+			})
+		})
+		return availablePositions
 	}
 
 	draw(parent) {

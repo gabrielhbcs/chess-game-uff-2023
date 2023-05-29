@@ -1,8 +1,10 @@
 class Board {
 	constructor(element) {
 		this.element = element
+		this.currentPlayer = 'white'
 		this.squares = [];
 		this.moves = [];
+		this.allPossibleMovements = []
 		for (let i = 0; i < 8; i++) {
 			this.squares[i] = [];
 			for (let j = 0; j < 8; j++) {
@@ -16,6 +18,16 @@ class Board {
 				this.squares[i][j] = square;
 			}
 		}
+	}
+
+	switchTurn(){
+        if (this.currentPlayer === 'white') {
+            this.currentPlayer = 'black';
+        } else {
+            this.currentPlayer = 'white';
+        }
+		this.getAllPossibleMovements();
+		//this.isCheck(this.allPossibleMovements);
 	}
 
 	addMove(piece, from, to) {
@@ -79,6 +91,17 @@ class Board {
 		cell.innerHTML = "";
 	}
 
+	getAllPossibleMovements(){
+		let allPossibleMovements = []
+		pieces.forEach(piece => {
+			allPossibleMovements.push({
+				piece: piece,
+				possibleMovements: piece.getPossibleMovements(this)
+			})
+		})
+		this.allPossibleMovements = allPossibleMovements;
+	}
+
 	movePiece(newRow, newCol) {
 		const { row, col, color, type } = selectedPiece;
 		const oldPieceCell = this.squares[row][col];
@@ -127,12 +150,24 @@ class Board {
 			selectedPiece.draw(this.squares[newRow][newCol]);
 			selectedPiece = null;
 		}
-
+		this.switchTurn();
+		
 		oldPieceCell.classList.remove("selected");
 		selectedCell.classList.remove("selected");
-
+		
 		selectedCell = null;
 		oldPieceCell.innerHTML = "";
+	}
+
+	drawPossibleMovements(){
+		document.querySelectorAll(".possible").forEach(cell => cell.classList.remove("possible"))
+		if(selectedPiece){
+			let possibleCells = selectedPiece.getPossibleMovements(this)
+			possibleCells.forEach(cellIndexes => {
+				this.squares[cellIndexes[0]][cellIndexes[1]].classList.add("possible")
+			})
+		}
+
 	}
 
 	draw(parent) {
@@ -176,22 +211,25 @@ class Board {
 							selectedCell.classList.remove("selected");
 							selectedCell = null;
 							selectedPiece = null
-
+							
 						} else if (!this.isEmpty(row, col) && pieceInCell) {
-							if (pieceInCell.color === "white" && currentPlayer === "white" ||
-								pieceInCell.color === "black" && currentPlayer === "black") {
+							if (pieceInCell.color === "white" && this.currentPlayer === "white" ||
+								pieceInCell.color === "black" && this.currentPlayer === "black") {
 								target.classList.add("selected")
 
 								if (selectedCell && selectedCell !== target) {
 									selectedCell.classList.remove("selected");
 									selectedPiece = null;
 								}
-
 								selectedPiece = pieceInCell;
 								selectedCell = target;
+								
 							}
 						}
+						this.drawPossibleMovements()
+			
 					};
+
 				});
 
 				row.appendChild(cell);

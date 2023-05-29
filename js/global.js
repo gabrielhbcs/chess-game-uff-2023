@@ -1,5 +1,4 @@
 let board = new Board(this);
-let currentPlayer = "black";
 let selectedPiece = null;
 let selectedCell = null;
 let pieces = [
