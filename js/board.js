@@ -12,6 +12,7 @@ async function getPromotionPiece() {
 	  }
 	  try {
 		const event = await waitForEvent(pieceForm, 'click');
+		event.preventDefault();
 		const name = event.target.localName;
 		if (name === "label") {
 			newPieceType = event.target.attributes.for.value;
