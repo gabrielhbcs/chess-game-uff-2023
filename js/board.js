@@ -1,10 +1,35 @@
+async function getPromotionPiece() {
+	const pieceForm = document.getElementById("piece-select");
+	let newPieceType = "";
+	function waitForEvent(element, eventType) {
+		return new Promise(function(resolve) {
+		  function eventHandler(event) {
+			element.removeEventListener(eventType, eventHandler);
+			resolve(event);
+		  }
+		  element.addEventListener(eventType, eventHandler);
+		});
+	  }
+	  try {
+		const event = await waitForEvent(pieceForm, 'click');
+		const name = event.target.localName;
+		if (name === "label") {
+			newPieceType = event.target.attributes.for.value;
+		} else if (name === "input") {
+			newPieceType = event.target.value;
+		}
+		return newPieceType;
+	  } catch (error) {
+		console.error('Error:', error);
+	  }
+}
 class Board {
 	constructor(element) {
 		this.element = element
 		this.currentPlayer = 'white'
 		this.squares = [];
 		this.moves = [];
-		this.allPossibleMovements = []
+		this.allPossibleMovements = [];
 		for (let i = 0; i < 8; i++) {
 			this.squares[i] = [];
 			for (let j = 0; j < 8; j++) {
@@ -17,7 +42,7 @@ class Board {
 				}
 				this.squares[i][j] = square;
 			}
-		}
+		};
 	}
 
 	switchTurn(){
@@ -123,13 +148,42 @@ class Board {
 		if (type === 'pawn' && selectedPiece.isGoingToPromote(newRow)) {
 			this.killPiece(row, col);
 
-			const cellForQueen = this.squares[newRow][newCol];
-			cellForQueen.innerHTML = "";
+			const cellForNewPiece = this.squares[newRow][newCol];
+			cellForNewPiece.innerHTML = "";
 
-			const newQueen = new Queen(color, newRow, newCol);
-			pieces.push(newQueen);
-			
-			newQueen.draw(cellForQueen);
+			const modal = document.getElementById("promote-pawn");
+			modal.style.display = "block";
+
+			getPromotionPiece().then((promoted) => {
+				switch (promoted) {
+					case "Queen":
+						const newQueen = new Queen(color, newRow, newCol);
+						pieces.push(newQueen);
+						newQueen.draw(cellForNewPiece);
+						modal.style.display = "none";
+						break;
+					case "Bishop":
+						const newBishop = new Bishop(color, newRow, newCol);
+						pieces.push(newBishop);
+						newBishop.draw(cellForNewPiece);
+						modal.style.display = "none";
+						break;
+					case "Knight":
+						const newKnight = new Knight(color, newRow, newCol);
+						pieces.push(newKnight);
+						newKnight.draw(cellForNewPiece);
+						modal.style.display = "none";
+						break;
+					case "Rook":
+						const newRook = new Rook(color, newRow, newCol);
+						pieces.push(newRook);
+						newRook.draw(cellForNewPiece);
+						modal.style.display = "none";
+						break;
+					default:
+						break;
+				}
+			})
 		} else {
 			selectedPiece.move(newRow, newCol);
 			selectedPiece.draw(this.squares[newRow][newCol]);
