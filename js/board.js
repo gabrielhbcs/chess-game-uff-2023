@@ -148,6 +148,7 @@ class Board {
 		// caso o pawn seja promovido
 		if (type === 'pawn' && selectedPiece.isGoingToPromote(newRow)) {
 			this.killPiece(row, col);
+			selectedPiece = null;
 
 			const cellForNewPiece = this.squares[newRow][newCol];
 			cellForNewPiece.innerHTML = "";
