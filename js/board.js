@@ -54,11 +54,10 @@ class Board {
 				repeatedMoves += 1;
 			}
 		}
-		console.log(repeatedMoves)
 		return repeatedMoves;
 	}
 
-	checkTie(){ //verifica empate
+	checkTie(){
 		if(this.movesWithoutCapture >= 50){
 			this.openModal('O jogo empatou por quantidade de jogadas sem nenhuma peça ser comida.');
 		}
