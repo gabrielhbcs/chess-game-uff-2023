@@ -1,8 +1,10 @@
 class Board {
 	constructor(element) {
 		this.element = element
+		this.currentPlayer = 'white'
 		this.squares = [];
 		this.moves = [];
+		this.allPossibleMovements = []
 		for (let i = 0; i < 8; i++) {
 			this.squares[i] = [];
 			for (let j = 0; j < 8; j++) {
@@ -16,6 +18,16 @@ class Board {
 				this.squares[i][j] = square;
 			}
 		}
+	}
+
+	switchTurn(){
+        if (this.currentPlayer === 'white') {
+            this.currentPlayer = 'black';
+        } else {
+            this.currentPlayer = 'white';
+        }
+		this.setAllPossibleMovements();
+		//this.isCheck(this.allPossibleMovements);
 	}
 
 	addMove(piece, from, to) {
@@ -32,6 +44,28 @@ class Board {
 				return false;
 			};
 		};
+		return true;
+	}
+
+	isCheck(possibleMoves) {
+		for (move of possibleMoves) {
+			if (move.attacking === "king") return true;
+		}
+		return false;
+	}
+
+	isCheckmate(possibleMoves) {
+		// O Rei deve estar em xeque
+		const isKingInCheck = this.isCheck(possibleMoves);
+		if (!isKingInCheck) return false;
+
+		// Não deve existir movimentos válidos
+		const hasValidMove = possibleMoves.some((move) =>{
+			move.piece.color === this.currentPlayer
+		})
+		if (hasValidMove) return false;
+
+		// Nesse caso, é Xeque Mate
 		return true;
 	}
 
@@ -114,13 +148,14 @@ class Board {
 
 			const newQueen = new Queen(color, newRow, newCol);
 			pieces.push(newQueen);
-			
+
 			newQueen.draw(cellForQueen);
 		} else {
 			selectedPiece.move(newRow, newCol);
 			selectedPiece.draw(this.squares[newRow][newCol]);
 			selectedPiece = null;
 		}
+		this.switchTurn();
 
 		oldPieceCell.classList.remove("selected");
 		selectedCell.classList.remove("selected");
@@ -160,7 +195,7 @@ class Board {
 				cell.addEventListener("click", (event) => {
 					const { target } = event;
 					if (target.classList.contains("square")) {
-						
+
 						const row = parseInt(target.dataset.row);
 						const col = parseInt(target.dataset.col);
 						let pieceInCell = this.getPiece(row, col);
@@ -184,8 +219,8 @@ class Board {
 							selectedPiece = null
 
 						} else if (!this.isEmpty(row, col) && pieceInCell) {
-							if (pieceInCell.color === "white" && currentPlayer === "white" ||
-								pieceInCell.color === "black" && currentPlayer === "black") {
+							if (pieceInCell.color === "white" && this.currentPlayer === "white" ||
+								pieceInCell.color === "black" && this.currentPlayer === "black") {
 								target.classList.add("selected")
 
 								if (selectedCell && selectedCell !== target) {
@@ -194,10 +229,11 @@ class Board {
 								}
 								selectedPiece = pieceInCell;
 								selectedCell = target;
+
 							}
 						}
 						this.drawPossibleMovements()
-			
+
 					};
 
 				});
