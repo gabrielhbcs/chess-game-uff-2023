@@ -161,76 +161,27 @@ class Bishop extends Piece {
 		this.type = "bishop";
 	}
 
-	possibleMoves = [];
-	calculatePossibleMoves() {
-		let possibleRow = this.row;
-		let possibleCol = this.col;
-		this.possibleMoves = [];
-		while (possibleRow !== 0 && possibleCol !== 0) {
-			possibleRow -= 1;
-			possibleCol -= 1;
-			if (board.isEmpty(possibleRow, possibleCol) || board.isOpponent(possibleRow, possibleCol, this.color)) {
-				this.possibleMoves.push([possibleRow, possibleCol]);
-			} else {
-				break;
+	isValidMove(newRow, newCol) {
+		// verificando se é a mesma posição
+		if (newRow === this.row && newCol === this.col) return false;
+		// verifique se o movimento é válido na diagonal
+		if (Math.abs(newRow - this.row) === Math.abs(newCol - this.col)) {
+			// determinando a direção (delta) do movimento (0 = parado)
+			const deltaRow = newRow - this.row > 0 ? 1 : newRow - this.row < 0 ? -1 : 0; // 1 = direita, -1 = esquerda
+			const deltaCol = newCol - this.col > 0 ? 1 : newCol - this.col < 0 ? -1 : 0; // 1 = cima, -1 = baixo
+			// verificando se existem peças no caminho
+			let checkRow = this.row + deltaRow;
+			let checkCol = this.col + deltaCol;
+			while (checkRow !== newRow || checkCol !== newCol) {
+				if (board.isEmpty(checkRow, checkCol) === false) return false;
+				checkRow += deltaRow;
+				checkCol += deltaCol;
 			}
-		}
-
-		possibleRow = this.row;
-		possibleCol = this.col;
-		while (possibleRow !== 0 && possibleCol !== 7) {
-			possibleRow -= 1;
-			possibleCol += 1;
-			if (board.isEmpty(possibleRow, possibleCol) || board.isOpponent(possibleRow, possibleCol, this.color)) {
-				this.possibleMoves.push([possibleRow, possibleCol]);
-			} else {
-				break;
-			}
-		}
-
-		possibleRow = this.row;
-		possibleCol = this.col;
-		while (possibleRow !== 7 && possibleCol !== 0) {
-			possibleRow += 1;
-			possibleCol -= 1;
-			if (board.isEmpty(possibleRow, possibleCol) || board.isOpponent(possibleRow, possibleCol, this.color)) {
-				this.possibleMoves.push([possibleRow, possibleCol]);
-			} else {
-				break;
-			}
-		}
-
-		possibleRow = this.row;
-		possibleCol = this.col;
-		while (possibleRow !== 7 && possibleCol !== 7) {
-			possibleRow += 1;
-			possibleCol += 1;
-			if (board.isEmpty(possibleRow, possibleCol) || board.isOpponent(possibleRow, possibleCol, this.color)) {
-				this.possibleMoves.push([possibleRow, possibleCol]);
-			} else {
-				break;
-			}
-		}
-	}
-
-	isValidMove(row, col) {
-		this.calculatePossibleMoves();
-		function compareArray(matrix) {
-			if (
-				matrix.find(
-					(element) => JSON.stringify(element) === JSON.stringify([row, col])
-				) &&
-				board.isEmpty()
-			)
-				return true;
-			return false;
-		}
-
-		if (compareArray(this.possibleMoves)) {
-			this.calculatePossibleMoves();
+			// não tem peças no caminho
 			return true;
 		}
-		return false;
+		// caso contrário, movimento é inválido
+		return false
 	}
 }
 

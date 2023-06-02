@@ -48,6 +48,28 @@ class Board {
 		return true;
 	}
 
+	isCheck(possibleMoves) {
+		for (move of possibleMoves) {
+			if (move.attacking === "king") return true;
+		}
+		return false;
+	}
+
+	isCheckmate(possibleMoves) {
+		// O Rei deve estar em xeque
+		const isKingInCheck = this.isCheck(possibleMoves);
+		if (!isKingInCheck) return false;
+
+		// Não deve existir movimentos válidos
+		const hasValidMove = possibleMoves.some((move) =>{
+			move.piece.color === this.currentPlayer
+		})
+		if (hasValidMove) return false;
+
+		// Nesse caso, é Xeque Mate
+		return true;
+	}
+
 	isOpponent(row, col, color) {
 		// verifica se a peça em row, col é inimiga de "color"
 		let piece = this.getPiece(row, col);
@@ -127,7 +149,7 @@ class Board {
 
 			const newQueen = new Queen(color, newRow, newCol);
 			pieces.push(newQueen);
-			
+
 			newQueen.draw(cellForQueen);
 		} else {
 			selectedPiece.move(newRow, newCol);
@@ -138,7 +160,7 @@ class Board {
 		
 		oldPieceCell.classList.remove("selected");
 		selectedCell.classList.remove("selected");
-		
+
 		selectedCell = null;
 		oldPieceCell.innerHTML = "";
 		this.switchTurn();
@@ -176,7 +198,7 @@ class Board {
 				cell.addEventListener("click", (event) => {
 					const { target } = event;
 					if (target.classList.contains("square")) {
-						
+
 						const row = parseInt(target.dataset.row);
 						const col = parseInt(target.dataset.col);
 						let pieceInCell = this.getPiece(row, col);
@@ -199,7 +221,7 @@ class Board {
 							selectedCell.classList.remove("selected");
 							selectedCell = null;
 							selectedPiece = null
-							
+
 						} else if (!this.isEmpty(row, col) && pieceInCell) {
 							if (pieceInCell.color === "white" && this.currentPlayer === "white" ||
 								pieceInCell.color === "black" && this.currentPlayer === "black") {
@@ -211,11 +233,11 @@ class Board {
 								}
 								selectedPiece = pieceInCell;
 								selectedCell = target;
-								
+
 							}
 						}
 						this.drawPossibleMovements()
-			
+
 					};
 
 				});
