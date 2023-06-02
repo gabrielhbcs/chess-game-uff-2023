@@ -43,7 +43,6 @@ class Piece {
 		playerBoard.addMove(new Move(this, new Position(this.row, this.col), new Position(row, col), board.getPiece(row, col)))
 		this.row = row;
 		this.col = col;
-
 	}
 
 	getPossibleMovements(board, validAndSafe = false) {
@@ -283,14 +282,14 @@ class Pawn extends Piece {
 		if (this.col === newCol && playerBoard.isEmpty(newRow, newCol)) {
 			// O peão pode se mover uma ou duas casas para frente na sua primeira jogada
 			if (this.color === "white") {
-				if (this.row === 1 && newRow === 3) {
+				if ((this.row === 1 && newRow === 3) && board.isEmpty(newRow - 1, newCol)) {
 					return true;
 				}
 				if (newRow === this.row + 1) {
 					return true;
 				}
 			} else {
-				if (this.row === 6 && newRow === 4) {
+				if ((this.row === 6 && newRow === 4) && board.isEmpty(newRow + 1, newCol)) {
 					return true;
 				}
 				if (newRow === this.row - 1) {

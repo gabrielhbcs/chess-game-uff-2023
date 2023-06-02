@@ -8,6 +8,7 @@ class Board {
 		this.allPossibleMovements = [];
 		this.allPossibleMovementsHistory = [];
 		this.selectedPiece = null;
+		this.computer = new ComputerAI()
 		this.pieces = [
 			new Rook("white", 0, 0),
 			new Knight("white", 0, 1),
@@ -103,16 +104,17 @@ class Board {
 		}
 	}
 
+	playAI() {
+		this.computer.chooseMove(this.allPossibleMovements);
+	}
+
 	switchTurn(){
-		if (this.currentPlayer === 'white') {
-			this.currentPlayer = 'black';
-        } else {
-			this.currentPlayer = 'white';
-        }
+		this.currentPlayer = this.currentPlayer === "white" ? "black" : "white"
 
 		this.setAllPossibleMovements();
 		this.checkTie();
 		this.setAllPossibleMovementsHistory();
+		this.playAI();
 	}
 	
 	addMove(piece, from, to, target) {
@@ -326,6 +328,7 @@ class Board {
 			this.squares[i] = [];
 			for (let j = 0; j < 8; j++) {
 				let cell = document.createElement("td");
+				cell.id = i.toString() + j.toString();
 				cell.className = "square";
 				if ((i + j) % 2 == 0) {
 					cell.classList.add("white");
@@ -347,7 +350,7 @@ class Board {
 							const _isValidMove = this.selectedPiece.isValidAndSafeMove(row, col, this);
 							const _isOpponent = this.isOpponent(row, col, this.selectedPiece.color);
 							if (pieceInCell && _isOpponent && _isValidMove) {
-								console.log("teste")
+								console.log("teste1")
 								this.killPiece(row, col);
 								this.movesWithoutCapture = 0;
 								this.movePiece(row, col);
