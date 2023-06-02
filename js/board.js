@@ -26,7 +26,7 @@ class Board {
 			new Pawn("white", 1, 5),
 			new Pawn("white", 1, 6),
 			new Pawn("white", 1, 7),
-			
+
 			new Pawn("black", 6, 0),
 			new Pawn("black", 6, 1),
 			new Pawn("black", 6, 2),
@@ -57,7 +57,6 @@ class Board {
 				}
 				this.squares[i][j] = square;
 			}
-			
 		}
 	}
 
@@ -66,7 +65,7 @@ class Board {
 		var modalText = document.getElementById("modal-text");
 		modalText.innerHTML = "";
 		modalText.innerHTML = content;
-		
+
 		modal.style.display = "block";
 	}
 
@@ -87,7 +86,7 @@ class Board {
 		let repeatedMoves = 0;
 		for(let i = 0; i < this.allPossibleMovementsHistory.length; i++){
 			let isRepeated = this.checkEqualMoves(this.allPossibleMovements, this.allPossibleMovementsHistory[i]);
-			
+
 			if(isRepeated){
 				repeatedMoves += 1;
 			}
@@ -95,12 +94,24 @@ class Board {
 		return repeatedMoves;
 	}
 
-	checkTie(){
+	checkGameEnd(){
+		if(this.isCheckmate() === true){
+			console.log('Xequemate');
+			console.log(this.currentPlayer)
+			console.log(this.allPossibleMovements)
+			this.openModal(`O jogo terminou em xequemate de ${this.currentPlayer}.`);
+		}
 		if(this.movesWithoutCapture >= 50){
 			this.openModal('O jogo empatou por quantidade de jogadas sem nenhuma peça ser comida.');
 		}
 		if(this.checkRepeatedMoves() >= 3){
 			this.openModal('O jogo empatou por quantidade de jogadas repetidas.');
+		}
+		if(this.isStalemate() === true){
+			console.log('Stalemate');
+			console.log(this.currentPlayer)
+			console.log(this.allPossibleMovements)
+			this.openModal('O jogo empatou por stalemate.')
 		}
 	}
 
@@ -112,28 +123,26 @@ class Board {
 		this.currentPlayer = this.currentPlayer === "white" ? "black" : "white"
 
 		this.setAllPossibleMovements();
-		this.checkTie();
+		this.checkGameEnd();
 		this.setAllPossibleMovementsHistory();
 		this.playAI();
 	}
-	
+
 	addMove(piece, from, to, target) {
-		this.moves.push({ piece: piece, from: from, to: to });
+		this.moves.push({ piece: piece, from: from, to: to, target: target });
 	}
 
 	isInCheck(color) {
 		if(!color) return false;
 		let king = this.pieces.find(x => x.type === "king" && x.color === color);
 		let enemyPieces = this.pieces.filter(x => x.color != color);
-		let isInCheck = false;
 		enemyPieces.forEach(piece => {
 			if (piece.isValidMove(king?.row, king?.col, this)) {
-				console.log("traidor")
-				isInCheck =  true;
-				return;
+				console.log("Move coloca rei em xeque")
+				return true;
 			}
 		})
-		return isInCheck;
+		return false;
 	}
 
 	getLastMove() {
@@ -149,48 +158,24 @@ class Board {
 		return true;
 	}
 
-	hasValidMoves(possibleMoves) {
-		for (move of possibleMoves) {
-			if (move.piece.color === this.currentPlayer) return true;
-		}
-		return false;
+	hasValidMoves() {
+		// Retorna true se tiver algum movimento possível para o jogador
+		return this.allPossibleMovements.some(move => move.piece.color === this.currentPlayer);
 	}
 
-	isCheck(possibleMoves, color) {
-		let isInCheck = false;
-		possibleMoves.forEach((move) => {
-			if (move.target?.type === "king" && move.target?.color === color) {
-				isInCheck = true;
-				return;
-			}
-		})
-		return isInCheck;
+	isCheck() {
+		// Retorna true se o rei do jogador está em xeque
+		return this.allPossibleMovements.some(move => move.target?.type === 'king');
 	}
 
-	isCheckmate(possibleMoves, color) {
-		// O Rei deve estar em xeque
-		const isKingInCheck = this.isCheck(possibleMoves, color);
-		if (!isKingInCheck) return false;
-
-		// Não deve existir movimentos válidos
-		const hasValidMove = this.hasValidMoves(possibleMoves);
-		if (hasValidMove) return false;
-
-		// Nesse caso, é Xeque Mate
-		return true;
+	isCheckmate() {
+		// O rei deve estar em xeque e o jogador não deve possuir movimentos válidos
+		return this.isCheck() && !this.hasValidMoves();
 	}
 
-	isStalemate(possibleMoves, color) {
-		// O Rei não pode estar em xeque
-		const isKingInCheck = this.isCheck(possibleMoves, color);
-		if (isKingInCheck) return false;
-
-		// Não deve existir movimentos válidos
-		const hasValidMove = this.hasValidMoves(possibleMoves);
-		if (hasValidMove) return false;
-
-		// Nesse caso, é Stalemate
-		return true;
+	isStalemate() {
+		// O rei não deve estar em xeque e o jogador não deve possuir movimentos válidos
+		return this.isCheck() && this.hasValidMoves();
 	}
 
 	isOpponent(row, col, color) {
@@ -228,22 +213,18 @@ class Board {
 			const { piece, from, to } = move;
 			return piece.isSafeMove(to.row, to.col);
 		  });
+		//console.log(this.allPossibleMovements)
 	}
 
 	getAllPossibleMovements(pseudoPieces = this.pieces){
-		let allPossibleMovements = []
-		pseudoPieces.forEach(piece => {
-			allPossibleMovements = allPossibleMovements.concat(piece.getPossibleMovements(this, true));
-		})
-		
-		return allPossibleMovements
+		return pseudoPieces.flatMap(piece => piece.getPossibleMovements(this, true));
 	}
 
 	copyBoard() {
 		let newBoard = Object.assign(Object.create(Object.getPrototypeOf(this)), this);
 		return newBoard;
-	}	
-	
+	}
+
 	setAllPossibleMovementsHistory(){
 		this.allPossibleMovementsHistory.push(this.allPossibleMovements);
 	}
@@ -299,7 +280,7 @@ class Board {
 			this.selectedPiece.draw(this.squares[newRow][newCol]);
 			this.selectedPiece = null;
 		}
-		
+
 		oldPieceCell.classList.remove("selected");
 		this.selectedCell.classList.remove("selected");
 
@@ -316,7 +297,6 @@ class Board {
 				this.squares[move.to.row][move.to.col].classList.add("possible")
 			})
 		}
-
 	}
 
 	draw(parent) {
@@ -345,7 +325,7 @@ class Board {
 						const row = parseInt(target.dataset.row);
 						const col = parseInt(target.dataset.col);
 						let pieceInCell = this.getPiece(row, col);
-						
+
 						if (this.selectedCell && this.selectedCell !== target) {
 							const _isValidMove = this.selectedPiece.isValidAndSafeMove(row, col, this);
 							const _isOpponent = this.isOpponent(row, col, this.selectedPiece.color);
@@ -370,7 +350,7 @@ class Board {
 							if (pieceInCell.color === "white" && this.currentPlayer === "white" ||
 							pieceInCell.color === "black" && this.currentPlayer === "black") {
 								target.classList.add("selected")
-								
+
 								if (this.selectedCell && this.selectedCell !== target) {
 									this.selectedCell.classList.remove("selected");
 									this.selectedPiece = null;
@@ -383,9 +363,9 @@ class Board {
 						this.drawPossibleMovements()
 
 					};
-					
+
 				});
-				
+
 				row.appendChild(cell);
 				this.squares[i][j] = cell;
 			}
