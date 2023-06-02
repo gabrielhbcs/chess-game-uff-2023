@@ -8,6 +8,7 @@ class Board {
 		this.allPossibleMovements = [];
 		this.allPossibleMovementsHistory = [];
 		this.selectedPiece = null;
+		this.computer = new ComputerAI()
 		this.pieces = [
 			new Rook("white", 0, 0),
 			new Knight("white", 0, 1),
@@ -104,8 +105,7 @@ class Board {
 	}
 
 	playAI() {
-		this.setAllPossibleMovements();
-		computer.chooseMove(this.allPossibleMovements);
+		this.computer.chooseMove(this.allPossibleMovements);
 	}
 
 	switchTurn(){
@@ -114,6 +114,7 @@ class Board {
 		this.setAllPossibleMovements();
 		this.checkTie();
 		this.setAllPossibleMovementsHistory();
+		this.playAI();
 	}
 	
 	addMove(piece, from, to, target) {
