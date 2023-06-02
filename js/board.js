@@ -72,6 +72,7 @@ class Board {
         } else {
 			this.currentPlayer = 'white';
         }
+
 		this.setAllPossibleMovements();
 		this.checkTie();
 		this.setAllPossibleMovementsHistory();
@@ -94,6 +95,13 @@ class Board {
 		return true;
 	}
 
+	hasValidMoves(possibleMoves) {
+		for (move of possibleMoves) {
+			if (move.piece.color === this.currentPlayer) return true;
+		}
+		return false;
+	}
+
 	isCheck(possibleMoves) {
 		for (move of possibleMoves) {
 			if (move.attacking === "king") return true;
@@ -107,12 +115,23 @@ class Board {
 		if (!isKingInCheck) return false;
 
 		// Não deve existir movimentos válidos
-		const hasValidMove = possibleMoves.some((move) =>{
-			move.piece.color === this.currentPlayer
-		})
+		const hasValidMove = this.hasValidMoves(possibleMoves);
 		if (hasValidMove) return false;
 
 		// Nesse caso, é Xeque Mate
+		return true;
+	}
+
+	isStalemate(possibleMoves) {
+		// O Rei não pode estar em xeque
+		const isKingInCheck = this.isCheck(possibleMoves);
+		if (isKingInCheck) return false;
+
+		// Não deve existir movimentos válidos
+		const hasValidMove = this.hasValidMoves(possibleMoves);
+		if (hasValidMove) return false;
+
+		// Nesse caso, é Stalemate
 		return true;
 	}
 
