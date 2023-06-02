@@ -4,7 +4,9 @@ class Board {
 		this.currentPlayer = 'white'
 		this.squares = [];
 		this.moves = [];
-		this.allPossibleMovements = []
+		this.movesWithoutCapture = 0;
+		this.allPossibleMovements = [];
+		this.allPossibleMovementsHistory = [];
 		for (let i = 0; i < 8; i++) {
 			this.squares[i] = [];
 			for (let j = 0; j < 8; j++) {
@@ -17,19 +19,64 @@ class Board {
 				}
 				this.squares[i][j] = square;
 			}
+			
+		}
+	}
+
+	openModal(content){
+		var modal = document.getElementById("modal");
+		var modalText = document.getElementById("modal-text");
+		modalText.innerHTML = "";
+		modalText.innerHTML = content;
+		
+		modal.style.display = "block";
+	}
+
+	closeModal(){
+		document.getElementById("modal").style.display = "none";
+	}
+
+	checkEqualMoves(moveOne, moveTwo){
+		for(let j = 0; j < moveTwo.length; j++){
+			if(JSON.stringify(moveOne[j]) !== JSON.stringify(moveTwo[j])){
+				return false;
+			}
+		}
+		return true
+	}
+
+	checkRepeatedMoves(){
+		let repeatedMoves = 0;
+		for(let i = 0; i < this.allPossibleMovementsHistory.length; i++){
+			let isRepeated = this.checkEqualMoves(this.allPossibleMovements, this.allPossibleMovementsHistory[i]);
+			
+			if(isRepeated){
+				repeatedMoves += 1;
+			}
+		}
+		return repeatedMoves;
+	}
+
+	checkTie(){
+		if(this.movesWithoutCapture >= 50){
+			this.openModal('O jogo empatou por quantidade de jogadas sem nenhuma peça ser comida.');
+		}
+		if(this.checkRepeatedMoves() >= 3){
+			this.openModal('O jogo empatou por quantidade de jogadas repetidas.');
 		}
 	}
 
 	switchTurn(){
-        if (this.currentPlayer === 'white') {
-            this.currentPlayer = 'black';
+		if (this.currentPlayer === 'white') {
+			this.currentPlayer = 'black';
         } else {
-            this.currentPlayer = 'white';
+			this.currentPlayer = 'white';
         }
-		this.getAllPossibleMovements();
-		//this.isCheck(this.allPossibleMovements);
+		this.setAllPossibleMovements();
+		this.checkTie();
+		this.setAllPossibleMovementsHistory();
 	}
-
+	
 	addMove(piece, from, to) {
 		this.moves.push({ piece: piece, from: from, to: to });
 	}
@@ -98,7 +145,7 @@ class Board {
 		cell.innerHTML = "";
 	}
 
-	getAllPossibleMovements(){
+	setAllPossibleMovements(){
 		let allPossibleMovements = []
 		pieces.forEach(piece => {
 			allPossibleMovements.push({
@@ -107,6 +154,10 @@ class Board {
 			})
 		})
 		this.allPossibleMovements = allPossibleMovements;
+	}
+	
+	setAllPossibleMovementsHistory(){
+		this.allPossibleMovementsHistory.push(this.allPossibleMovements);
 	}
 
 	movePiece(newRow, newCol) {
@@ -180,6 +231,7 @@ class Board {
 	draw(parent) {
 		let table = document.createElement("table");
 		table.className = "chessboard";
+
 		for (let i = 0; i < 8; i++) {
 			let row = document.createElement("tr");
 			this.squares[i] = [];
@@ -201,16 +253,18 @@ class Board {
 						const row = parseInt(target.dataset.row);
 						const col = parseInt(target.dataset.col);
 						let pieceInCell = this.getPiece(row, col);
-
+						
 						if (selectedCell && selectedCell !== target) {
 							const _isValidMove = selectedPiece.isValidMove(row, col);
 							const _isOpponent = this.isOpponent(row, col);
 							if (pieceInCell && _isOpponent && _isValidMove) {
 								this.killPiece(row, col);
+								this.movesWithoutCapture = 0;
 								this.movePiece(row, col);
 								pieceInCell = null
 							}
 							else if (_isValidMove && !pieceInCell) {
+								this.movesWithoutCapture += 1;
 								this.movePiece(row, col);
 							}
 						}
@@ -221,9 +275,9 @@ class Board {
 
 						} else if (!this.isEmpty(row, col) && pieceInCell) {
 							if (pieceInCell.color === "white" && this.currentPlayer === "white" ||
-								pieceInCell.color === "black" && this.currentPlayer === "black") {
+							pieceInCell.color === "black" && this.currentPlayer === "black") {
 								target.classList.add("selected")
-
+								
 								if (selectedCell && selectedCell !== target) {
 									selectedCell.classList.remove("selected");
 									selectedPiece = null;
@@ -236,14 +290,16 @@ class Board {
 						this.drawPossibleMovements()
 
 					};
-
+					
 				});
-
+				
 				row.appendChild(cell);
 				this.squares[i][j] = cell;
 			}
 			table.appendChild(row);
 		}
+		this.setAllPossibleMovements();
+		this.setAllPossibleMovementsHistory();
 		parent.appendChild(table);
 	}
 }
