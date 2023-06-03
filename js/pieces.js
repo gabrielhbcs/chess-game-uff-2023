@@ -35,6 +35,10 @@ class Piece {
 		return newPiece;
 	}
 
+	getPieceEmoji(){
+		return pieceEmoji[this.type][this.color];
+	}
+
 	getEnemyColor() {
 		return this.color === "white" ? "black" : "white";
 	}
@@ -43,6 +47,18 @@ class Piece {
 		playerBoard.addMove(new Move(this, new Position(this.row, this.col), new Position(row, col), board.getPiece(row, col)))
 		this.row = row;
 		this.col = col;
+	}
+
+	getValidMoves(board){
+		let moves = []
+		for (let rowIndex = 0; rowIndex < 8; rowIndex++){
+			for (let colIndex = 0; colIndex < 8; colIndex++){
+				if (this.isValidMove(rowIndex, colIndex) && !board.isPlayer(rowIndex, colIndex, this.color)){
+					moves.push(new Move(this, new Position(this.row, this.col), new Position(rowIndex, colIndex), board.getPiece(rowIndex, colIndex)))
+				}
+			}
+		}
+		return moves;
 	}
 
 	getPossibleMovements(board, validAndSafe = false) {
@@ -68,7 +84,7 @@ class Piece {
 		let pseudoPiece = this.copyPiece()
 		pseudoPiece.row = row;
 		pseudoPiece.col = col;
-		
+
 		let targetPiece = pseudoBoard.getPiece(row, col)
 		pseudoBoard.pieces = pseudoBoard.pieces.filter(piece => !(piece == pseudoBoard.selectedPiece || piece == targetPiece))
 		pseudoBoard.pieces.push(pseudoPiece)

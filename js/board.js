@@ -1,4 +1,6 @@
-class Board {
+import { BaseBoard } from "./base-board";
+
+export default class Board extends BaseBoard {
 	constructor(element) {
 		this.element = element
 		this.currentPlayer = 'white'
@@ -121,11 +123,12 @@ class Board {
 
 	switchTurn(){
 		this.currentPlayer = this.currentPlayer === "white" ? "black" : "white"
-
 		this.setAllPossibleMovements();
-		this.checkGameEnd();
+		//this.checkGameEnd();
 		this.setAllPossibleMovementsHistory();
 		this.playAI();
+		//let copiaBoard = {... this};
+		//console.log("Peças do board copiado", copiaBoard.pieces)
 	}
 
 	addMove(piece, from, to, target) {
@@ -186,6 +189,13 @@ class Board {
 		return false;
 	}
 
+	isPlayer(row, col, color){
+		let piece = this.getPiece(row, col);
+		if (color && piece)
+			return (piece.color == color);
+		return false;
+	}
+
 	getCell(row, col) {
 		return this.squares[row][col];
 	}
@@ -214,6 +224,27 @@ class Board {
 			return piece.isSafeMove(to.row, to.col);
 		  });
 		//console.log(this.allPossibleMovements)
+	}
+
+	getAllOpponentMoves(pseudoPieces = this.pieces){
+		return pseudoPieces
+			.filter(piece => piece.color !== this.currentPlayer)
+			.flatMap(piece => piece.getValidMovements(this));
+	}
+
+	previewMove(move){
+		let preview = {...this};
+		preview.selectedPiece = move.piece;
+		preview.movePiece(move.to.row, move.to.col);
+		console.log("Simulação:",preview.pieces);
+	}
+
+	previewAllMoves(moves){
+		moves.forEach(move => this.previewMove(move));
+	}
+
+	removeInvalidMoves(moves){
+		return moves.filter(move => this.previewMove(move));
 	}
 
 	getAllPossibleMovements(pseudoPieces = this.pieces){
@@ -292,6 +323,14 @@ class Board {
 	drawPossibleMovements(){
 		document.querySelectorAll(".possible").forEach(cell => cell.classList.remove("possible"))
 		if(this.selectedPiece){
+			// ---- Testes -----
+			console.log("Selected:", this.selectedPiece)
+			let moves = this.selectedPiece.getValidMovements(this)
+			console.log("Moves da Peça:", moves)
+			console.log("Moves do Oponente:",this.getAllOpponentMoves())
+			console.log("=========================")
+			this.previewAllMoves(moves);
+			// -----------------
 			let possibleCells = this.selectedPiece.getPossibleMovements(this, true)
 			possibleCells.forEach(move => {
 				this.squares[move.to.row][move.to.col].classList.add("possible")
