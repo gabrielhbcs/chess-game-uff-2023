@@ -61,6 +61,18 @@ class Piece {
 		return moves;
 	}
 
+	getSafeMoves(board){
+		let moves = []
+		for (let rowIndex = 0; rowIndex < 8; rowIndex++){
+			for (let colIndex = 0; colIndex < 8; colIndex++){
+				if (this.isValidAndSafeMove(rowIndex, colIndex) && !board.isPlayer(rowIndex, colIndex, this.color)){
+					moves.push(new Move(this, new Position(this.row, this.col), new Position(rowIndex, colIndex), board.getPiece(rowIndex, colIndex)))
+				}
+			}
+		}
+		return moves;
+	}
+
 	getPossibleMovements(board, validAndSafe = false) {
 		let availableMoves = []
 		board.squares.forEach((row, rowIndex) => {
@@ -88,7 +100,7 @@ class Piece {
 		let targetPiece = pseudoBoard.getPiece(row, col)
 		pseudoBoard.pieces = pseudoBoard.pieces.filter(piece => !(piece == pseudoBoard.selectedPiece || piece == targetPiece))
 		pseudoBoard.pieces.push(pseudoPiece)
-		return !pseudoBoard.isInCheck(pseudoPiece?.color);
+		return !pseudoBoard.isCheck();
 	}
 
 	draw(parent) {
@@ -116,7 +128,7 @@ class King extends Piece {
 		super.move(row, col)
 	}
 
-	isValidMove(newRow, newCol) {
+	isValidMove(newRow, newCol, playerBoard = board) {
 		//verifica se a posição escolhida está à uma cas de distância da posição atual
 		if (newRow === this.row || newRow === this.row - 1 || newRow === this.row + 1) {
 			if (newCol === this.col || newCol === this.col - 1 || newCol === this.col + 1) {
@@ -171,7 +183,6 @@ class Queen extends Piece {
 	}
 
 	isValidMove(newRow, newCol, playerBoard = board) {
-		// if (!super.isMoveSafe(newRow, newCol)) return false;
 		// verificando se é a mesma posição
 		if (newRow === this.row && newCol === this.col) return false;
 		// verifique se o movimento é válido na vertical, horizontal ou diagonal

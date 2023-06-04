@@ -1,6 +1,4 @@
-import { BaseBoard } from "./base-board";
-
-export default class Board extends BaseBoard {
+class Board {
 	constructor(element) {
 		this.element = element
 		this.currentPlayer = 'white'
@@ -11,7 +9,31 @@ export default class Board extends BaseBoard {
 		this.allPossibleMovementsHistory = [];
 		this.selectedPiece = null;
 		this.computer = new ComputerAI()
-		this.pieces = [
+		this.pieces = this.createPieces()
+		this.selectedCell = null;
+		this.createSquares();
+	}
+
+	// Desenha os squares na tela
+	createSquares(){
+		for (let i = 0; i < 8; i++) {
+			this.squares[i] = [];
+			for (let j = 0; j < 8; j++) {
+				let square = document.createElement("div");
+				square.className = "square";
+				if ((i + j) % 2 == 0) {
+					square.classList.add("white");
+				} else {
+					square.classList.add("black");
+				}
+				this.squares[i][j] = square;
+			}
+		}
+	}
+
+	// Coloca todas as peças no campo para começar um novo jogo
+	createPieces(){
+		const pieces = [
 			new Rook("white", 0, 0),
 			new Knight("white", 0, 1),
 			new Bishop("white", 0, 2),
@@ -46,20 +68,7 @@ export default class Board extends BaseBoard {
 			new Knight("black", 7, 6),
 			new Rook("black", 7, 7)
 		];
-		this.selectedCell = null;
-		for (let i = 0; i < 8; i++) {
-			this.squares[i] = [];
-			for (let j = 0; j < 8; j++) {
-				let square = document.createElement("div");
-				square.className = "square";
-				if ((i + j) % 2 == 0) {
-					square.classList.add("white");
-				} else {
-					square.classList.add("black");
-				}
-				this.squares[i][j] = square;
-			}
-		}
+		return pieces;
 	}
 
 	openModal(content){
@@ -96,6 +105,7 @@ export default class Board extends BaseBoard {
 		return repeatedMoves;
 	}
 
+	// Checa as condições para encerrar o jogo
 	checkGameEnd(){
 		if(this.isCheckmate() === true){
 			console.log('Xequemate');
@@ -117,23 +127,129 @@ export default class Board extends BaseBoard {
 		}
 	}
 
+	// Faz a jogada da AI
 	playAI() {
 		this.computer.chooseMove(this.allPossibleMovements);
 	}
 
+	// Troca de turno e executa os procedimentos de turno
 	switchTurn(){
-		this.currentPlayer = this.currentPlayer === "white" ? "black" : "white"
+		this.currentPlayer = this.getNextPlayer();
+		//this.allPossibleMovements = this.getAllSafeMovements();
+		//console.log("Moves: ", this.allPossibleMovements);
+		//console.log("Moves safe:", this.getAllSafeMovements());
 		this.setAllPossibleMovements();
 		//this.checkGameEnd();
-		this.setAllPossibleMovementsHistory();
+		//this.setAllPossibleMovementsHistory();
 		this.playAI();
-		//let copiaBoard = {... this};
-		//console.log("Peças do board copiado", copiaBoard.pieces)
 	}
 
+	// Adiciona um movimento para o histórico de jogadas
 	addMove(piece, from, to, target) {
 		this.moves.push({ piece: piece, from: from, to: to, target: target });
 	}
+
+	// Retorna a jogada mais recente do histórico
+	getLastMove() {
+		return this.moves.length > 0 ? this.moves[this.moves.length - 1] : null;
+	}
+
+	// Retorna true se tiver algum movimento possível para o jogador
+	hasValidMoves() {
+		return this.allPossibleMovements.some(move => move.piece.color === this.currentPlayer);
+	}
+
+	// Checa se jogador atual está em Xeque
+	isCheck(){
+		const opponentMoves = this.getAllPlayerMoves(this.getNextPlayer());
+		return opponentMoves.some(move => move.target?.type === 'king');
+	}
+
+	// O rei deve estar em xeque e o jogador não deve possuir movimentos válidos
+	isCheckmate() {
+		return this.isCheck() && !this.hasValidMoves();
+	}
+
+	// O rei não deve estar em xeque e o jogador não deve possuir movimentos válidos
+	isStalemate() {
+		return this.isCheck() && this.hasValidMoves();
+	}
+
+	// Checa se na posição tem uma peça do oponente
+	isOpponent(row, col, color) {
+		let piece = this.getPiece(row, col);
+		if (color && piece)
+			return !(piece.color == color);
+		return false;
+	}
+
+	// Checa se na posição tem uma peça do jogador
+	isPlayer(row, col, color){
+		let piece = this.getPiece(row, col);
+		if (color && piece)
+			return (piece.color == color);
+		return false;
+	}
+
+	// Checa se não tem nenhuma peça na posição
+	isEmpty(row, col) {
+		for (let piece of this.pieces) {
+			if (piece.row === row && piece.col === col) {
+				return false;
+			};
+		};
+		return true;
+	}
+
+	// Retorna uma string com o nome do próximo jogador
+	getNextPlayer(){
+		return this.currentPlayer === "white" ? "black" : "white";
+	}
+
+	// Retorna um square do campo
+	getCell(row, col) {
+		return this.squares[row][col];
+	}
+
+	// Retorna um objeto do tipo Piece que está nesta posição
+	getPiece(row, col) {
+		for (let piece of this.pieces) {
+			if (piece.row === row && piece.col === col) {
+				return piece;
+			};
+		};
+		return null;
+	}
+
+	// Remove uma peça do campo
+	killPiece(row, col) {
+		const killedPiece = this.getPiece(row, col);
+		const filteredPieces = this.pieces.filter((piece) => piece !== killedPiece);
+
+		this.pieces = [ ...filteredPieces ];
+		const cell = this.squares[row][col];
+		cell.innerHTML = "";
+	}
+
+	// Retorna todos os movimentos possíveis de ambos jogadores
+	getAllMovements(allPieces = this.pieces){
+		return allPieces.flatMap(piece => piece.getValidMoves(this));
+	}
+
+	getAllSafeMovements(allPieces = this.pieces){
+		return allPieces.flatMap(piece => piece.getSafeMoves(this));
+	}
+
+	// Retorna todos os movimentos do jogador selecionado
+	getAllPlayerMoves(player, allPieces = this.pieces){
+		return allPieces
+			.filter(piece => piece.color === player)
+			.flatMap(piece => piece.getPossibleMovements(this));
+	}
+
+	// ================ Para ser Removido ===================
+
+
 
 	isInCheck(color) {
 		if(!color) return false;
@@ -146,90 +262,6 @@ export default class Board extends BaseBoard {
 			}
 		})
 		return false;
-	}
-
-	getLastMove() {
-		return this.moves.length > 0 ? this.moves[this.moves.length - 1] : null;
-	}
-
-	isEmpty(row, col) {
-		for (let piece of this.pieces) {
-			if (piece.row === row && piece.col === col) {
-				return false;
-			};
-		};
-		return true;
-	}
-
-	hasValidMoves() {
-		// Retorna true se tiver algum movimento possível para o jogador
-		return this.allPossibleMovements.some(move => move.piece.color === this.currentPlayer);
-	}
-
-	isCheck() {
-		// Retorna true se o rei do jogador está em xeque
-		return this.allPossibleMovements.some(move => move.target?.type === 'king');
-	}
-
-	isCheckmate() {
-		// O rei deve estar em xeque e o jogador não deve possuir movimentos válidos
-		return this.isCheck() && !this.hasValidMoves();
-	}
-
-	isStalemate() {
-		// O rei não deve estar em xeque e o jogador não deve possuir movimentos válidos
-		return this.isCheck() && this.hasValidMoves();
-	}
-
-	isOpponent(row, col, color) {
-		// verifica se a peça em row, col é inimiga de "color"
-		let piece = this.getPiece(row, col);
-		if (color && piece)
-			return !(piece.color == color);
-		return false;
-	}
-
-	isPlayer(row, col, color){
-		let piece = this.getPiece(row, col);
-		if (color && piece)
-			return (piece.color == color);
-		return false;
-	}
-
-	getCell(row, col) {
-		return this.squares[row][col];
-	}
-
-	getPiece(row, col) {
-		for (let piece of this.pieces) {
-			if (piece.row === row && piece.col === col) {
-				return piece;
-			};
-		};
-		return null;
-	}
-
-	killPiece(row, col) {
-		const killedPiece = this.getPiece(row, col);
-		const filteredPieces = this.pieces.filter((piece) => piece !== killedPiece);
-
-		this.pieces = [ ...filteredPieces ];
-		const cell = this.squares[row][col];
-		cell.innerHTML = "";
-	}
-
-	setAllPossibleMovements(){
-		this.allPossibleMovements = this.getAllPossibleMovements().filter(move => {
-			const { piece, from, to } = move;
-			return piece.isSafeMove(to.row, to.col);
-		  });
-		//console.log(this.allPossibleMovements)
-	}
-
-	getAllOpponentMoves(pseudoPieces = this.pieces){
-		return pseudoPieces
-			.filter(piece => piece.color !== this.currentPlayer)
-			.flatMap(piece => piece.getValidMovements(this));
 	}
 
 	previewMove(move){
@@ -251,6 +283,13 @@ export default class Board extends BaseBoard {
 		return pseudoPieces.flatMap(piece => piece.getPossibleMovements(this, true));
 	}
 
+	setAllPossibleMovements(){
+		this.allPossibleMovements = this.getAllPossibleMovements().filter(move => {
+			const { piece, from, to } = move;
+			return piece.isSafeMove(to.row, to.col);
+		  });
+	}
+
 	copyBoard() {
 		let newBoard = Object.assign(Object.create(Object.getPrototypeOf(this)), this);
 		return newBoard;
@@ -259,6 +298,8 @@ export default class Board extends BaseBoard {
 	setAllPossibleMovementsHistory(){
 		this.allPossibleMovementsHistory.push(this.allPossibleMovements);
 	}
+
+	// ==============================================================
 
 	movePiece(newRow, newCol) {
 		if(this.selectedPiece === null) {
@@ -323,14 +364,6 @@ export default class Board extends BaseBoard {
 	drawPossibleMovements(){
 		document.querySelectorAll(".possible").forEach(cell => cell.classList.remove("possible"))
 		if(this.selectedPiece){
-			// ---- Testes -----
-			console.log("Selected:", this.selectedPiece)
-			let moves = this.selectedPiece.getValidMovements(this)
-			console.log("Moves da Peça:", moves)
-			console.log("Moves do Oponente:",this.getAllOpponentMoves())
-			console.log("=========================")
-			this.previewAllMoves(moves);
-			// -----------------
 			let possibleCells = this.selectedPiece.getPossibleMovements(this, true)
 			possibleCells.forEach(move => {
 				this.squares[move.to.row][move.to.col].classList.add("possible")
@@ -367,9 +400,10 @@ export default class Board extends BaseBoard {
 
 						if (this.selectedCell && this.selectedCell !== target) {
 							const _isValidMove = this.selectedPiece.isValidAndSafeMove(row, col, this);
+							//const _isValidMove = this.selectedPiece.isSafe(row, col, this.selectedPiece);
 							const _isOpponent = this.isOpponent(row, col, this.selectedPiece.color);
 							if (pieceInCell && _isOpponent && _isValidMove) {
-								console.log("teste1")
+								console.log(`${this.selectedPiece.getPieceEmoji()} captura ${pieceInCell.getPieceEmoji()}`)
 								this.killPiece(row, col);
 								this.movesWithoutCapture = 0;
 								this.movePiece(row, col);
@@ -396,15 +430,11 @@ export default class Board extends BaseBoard {
 								}
 								this.selectedPiece = pieceInCell;
 								this.selectedCell = target;
-
 							}
 						}
 						this.drawPossibleMovements()
-
 					};
-
 				});
-
 				row.appendChild(cell);
 				this.squares[i][j] = cell;
 			}
@@ -412,6 +442,7 @@ export default class Board extends BaseBoard {
 		}
 		this.setAllPossibleMovements();
 		this.setAllPossibleMovementsHistory();
+		//this.allPossibleMovements = this.getAllMovements();
 		parent.appendChild(table);
 	}
 }
