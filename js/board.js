@@ -111,7 +111,7 @@ class Board {
 			console.log('Xequemate');
 			console.log(this.currentPlayer)
 			console.log(this.allPossibleMovements)
-			this.openModal(`O jogo terminou em xequemate de ${this.currentPlayer}.`);
+			this.openModal(`O jogo terminou. Xequemate em ${this.currentPlayer}.`);
 		}
 		if(this.movesWithoutCapture >= 50){
 			this.openModal('O jogo empatou por quantidade de jogadas sem nenhuma peça ser comida.');
@@ -135,12 +135,9 @@ class Board {
 	// Troca de turno e executa os procedimentos de turno
 	switchTurn(){
 		this.currentPlayer = this.getNextPlayer();
-		//this.allPossibleMovements = this.getAllSafeMovements();
-		//console.log("Moves: ", this.allPossibleMovements);
-		//console.log("Moves safe:", this.getAllSafeMovements());
 		this.setAllPossibleMovements();
-		//this.checkGameEnd();
-		//this.setAllPossibleMovementsHistory();
+		this.checkGameEnd();
+		this.setAllPossibleMovementsHistory();
 		this.playAI();
 	}
 
@@ -156,7 +153,8 @@ class Board {
 
 	// Retorna true se tiver algum movimento possível para o jogador
 	hasValidMoves() {
-		return this.allPossibleMovements.some(move => move.piece.color === this.currentPlayer);
+		const playerMoves = this.getAllPlayerMoves(this.currentPlayer, this.pieces , true);
+		return playerMoves[0] !== null;
 	}
 
 	// Checa se jogador atual está em Xeque
@@ -172,7 +170,7 @@ class Board {
 
 	// O rei não deve estar em xeque e o jogador não deve possuir movimentos válidos
 	isStalemate() {
-		return this.isCheck() && this.hasValidMoves();
+		return !this.isCheck() && !this.hasValidMoves();
 	}
 
 	// Checa se na posição tem uma peça do oponente
@@ -231,58 +229,19 @@ class Board {
 		cell.innerHTML = "";
 	}
 
-	// Retorna todos os movimentos possíveis de ambos jogadores
-	getAllMovements(allPieces = this.pieces){
-		return allPieces.flatMap(piece => piece.getValidMoves(this));
-	}
-
-	getAllSafeMovements(allPieces = this.pieces){
-		return allPieces.flatMap(piece => piece.getSafeMoves(this));
-	}
-
 	// Retorna todos os movimentos do jogador selecionado
-	getAllPlayerMoves(player, allPieces = this.pieces){
+	getAllPlayerMoves(player, allPieces = this.pieces, valid = false){
 		return allPieces
-			.filter(piece => piece.color === player)
-			.flatMap(piece => piece.getPossibleMovements(this));
+		.filter(piece => piece.color === player)
+		.flatMap(piece => piece.getPossibleMovements(this, valid));
 	}
 
-	// ================ Para ser Removido ===================
-
-
-
-	isInCheck(color) {
-		if(!color) return false;
-		let king = this.pieces.find(x => x.type === "king" && x.color === color);
-		let enemyPieces = this.pieces.filter(x => x.color != color);
-		enemyPieces.forEach(piece => {
-			if (piece.isValidMove(king?.row, king?.col, this)) {
-				console.log("Move coloca rei em xeque")
-				return true;
-			}
-		})
-		return false;
-	}
-
-	previewMove(move){
-		let preview = {...this};
-		preview.selectedPiece = move.piece;
-		preview.movePiece(move.to.row, move.to.col);
-		console.log("Simulação:",preview.pieces);
-	}
-
-	previewAllMoves(moves){
-		moves.forEach(move => this.previewMove(move));
-	}
-
-	removeInvalidMoves(moves){
-		return moves.filter(move => this.previewMove(move));
-	}
-
+	// Retorna todos os movimentos possíveis de ambos jogadores
 	getAllPossibleMovements(pseudoPieces = this.pieces){
 		return pseudoPieces.flatMap(piece => piece.getPossibleMovements(this, true));
 	}
 
+	// Coloca todas os movimentos válidos na variável de movimentos possíveis
 	setAllPossibleMovements(){
 		this.allPossibleMovements = this.getAllPossibleMovements().filter(move => {
 			const { piece, from, to } = move;
@@ -290,6 +249,20 @@ class Board {
 		  });
 	}
 
+	// Desenha o campo no console apenas para propósito de testes
+	drawBoard() {
+		let chessboard = "";
+		for (let x = 0; x < 8; x++) {
+		  for (let y = 0; y < 8; y++) {
+			const piece = this.getPiece(x, y);
+			chessboard += piece ? piece.getPieceEmoji() : "_ ";
+		  }
+		  chessboard += "\n";
+		}
+		console.log(chessboard);
+	}
+
+	// Cria uma cópia do campo atual
 	copyBoard() {
 		let newBoard = Object.assign(Object.create(Object.getPrototypeOf(this)), this);
 		return newBoard;
@@ -299,8 +272,7 @@ class Board {
 		this.allPossibleMovementsHistory.push(this.allPossibleMovements);
 	}
 
-	// ==============================================================
-
+	// Responsável por mover a peça e fazer movimentos especiais
 	movePiece(newRow, newCol) {
 		if(this.selectedPiece === null) {
 			return;
@@ -361,6 +333,7 @@ class Board {
 		this.switchTurn();
 	}
 
+	// Mostra todas as posições que a peça clicada pode tentar
 	drawPossibleMovements(){
 		document.querySelectorAll(".possible").forEach(cell => cell.classList.remove("possible"))
 		if(this.selectedPiece){
@@ -400,7 +373,6 @@ class Board {
 
 						if (this.selectedCell && this.selectedCell !== target) {
 							const _isValidMove = this.selectedPiece.isValidAndSafeMove(row, col, this);
-							//const _isValidMove = this.selectedPiece.isSafe(row, col, this.selectedPiece);
 							const _isOpponent = this.isOpponent(row, col, this.selectedPiece.color);
 							if (pieceInCell && _isOpponent && _isValidMove) {
 								console.log(`${this.selectedPiece.getPieceEmoji()} captura ${pieceInCell.getPieceEmoji()}`)
@@ -442,7 +414,6 @@ class Board {
 		}
 		this.setAllPossibleMovements();
 		this.setAllPossibleMovementsHistory();
-		//this.allPossibleMovements = this.getAllMovements();
 		parent.appendChild(table);
 	}
 }

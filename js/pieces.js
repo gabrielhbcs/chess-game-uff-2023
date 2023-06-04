@@ -30,49 +30,30 @@ class Piece {
 		this.col = col;
 	}
 
+	// Cria uma cópia dessa peça
 	copyPiece() {
 		let newPiece = Object.assign(Object.create(Object.getPrototypeOf(this)), this);
 		return newPiece;
 	}
 
+	// Retorna o emoji correspondente a essa peça
 	getPieceEmoji(){
 		return pieceEmoji[this.type][this.color];
 	}
 
+	// Retorna a cor do oponente desta peça
 	getEnemyColor() {
 		return this.color === "white" ? "black" : "white";
 	}
 
+	// Move a peça e salva o movimento no histórico
 	move(row, col, playerBoard = board) {
 		playerBoard.addMove(new Move(this, new Position(this.row, this.col), new Position(row, col), board.getPiece(row, col)))
 		this.row = row;
 		this.col = col;
 	}
 
-	getValidMoves(board){
-		let moves = []
-		for (let rowIndex = 0; rowIndex < 8; rowIndex++){
-			for (let colIndex = 0; colIndex < 8; colIndex++){
-				if (this.isValidMove(rowIndex, colIndex) && !board.isPlayer(rowIndex, colIndex, this.color)){
-					moves.push(new Move(this, new Position(this.row, this.col), new Position(rowIndex, colIndex), board.getPiece(rowIndex, colIndex)))
-				}
-			}
-		}
-		return moves;
-	}
-
-	getSafeMoves(board){
-		let moves = []
-		for (let rowIndex = 0; rowIndex < 8; rowIndex++){
-			for (let colIndex = 0; colIndex < 8; colIndex++){
-				if (this.isValidAndSafeMove(rowIndex, colIndex) && !board.isPlayer(rowIndex, colIndex, this.color)){
-					moves.push(new Move(this, new Position(this.row, this.col), new Position(rowIndex, colIndex), board.getPiece(rowIndex, colIndex)))
-				}
-			}
-		}
-		return moves;
-	}
-
+	// Retorna todos os movimentos pseudo-validos ou válidos desta peça
 	getPossibleMovements(board, validAndSafe = false) {
 		let availableMoves = []
 		board.squares.forEach((row, rowIndex) => {
@@ -87,10 +68,12 @@ class Piece {
 		return availableMoves
 	}
 
+	// Um wrapper para os métodos isValidMove e isSafeMove
 	isValidAndSafeMove(newRow, newCol, playerBoard = board) {
 		return this.isValidMove(newRow, newCol, playerBoard) && this.isSafeMove(newRow, newCol)
 	}
 
+	// Simula um movimento para saber se ele não coloca seu rei em Xeque
 	isSafeMove(row, col) {
 		let pseudoBoard  = board.copyBoard();
 		let pseudoPiece = this.copyPiece()
@@ -103,6 +86,7 @@ class Piece {
 		return !pseudoBoard.isCheck();
 	}
 
+	// Desenha a peça no campo
 	draw(parent) {
 		let piece = document.createElement("div");
 		piece.className = "piece";
