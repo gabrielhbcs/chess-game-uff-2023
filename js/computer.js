@@ -9,7 +9,6 @@ class ComputerAI {
 
         let movement = allComputerMovements[Math.floor(Math.random() * allComputerMovements.length)];
         if (!movement) return;
-        //console.log(movement)
 
         //this.suggestMove(movement);
         let fromId = this.getRowColId(movement.from.row, movement.from.col);
@@ -26,7 +25,6 @@ class ComputerAI {
             cancelable: true,
             view: window
           });
-        //console.log(Date.now())
         cell.dispatchEvent(clickEvent);
     }
 
