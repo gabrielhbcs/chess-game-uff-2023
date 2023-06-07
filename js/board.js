@@ -384,13 +384,18 @@ class Board {
 					default:
 						break;
 				}
+				this.clearSelectedPiece(oldPieceCell);
 			})
 		} else {
 			this.selectedPiece.move(newRow, newCol);
 			this.selectedPiece.draw(this.squares[newRow][newCol]);
 			this.selectedPiece = null;
-		}
 
+			this.clearSelectedPiece(oldPieceCell);
+		}
+	}
+
+	clearSelectedPiece(oldPieceCell) {
 		oldPieceCell.classList.remove("selected");
 		this.selectedCell.classList.remove("selected");
 
