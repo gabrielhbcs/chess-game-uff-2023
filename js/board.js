@@ -154,7 +154,8 @@ class Board {
 	// Retorna true se tiver algum movimento possível para o jogador
 	hasValidMoves() {
 		const playerMoves = this.getAllPlayerMoves(this.currentPlayer, this.pieces , true);
-		return playerMoves[0] !== null;
+		//console.log(playerMoves);
+		return playerMoves.some(move => move.piece?.color === this.currentPlayer);
 	}
 
 	// Checa se jogador atual está em Xeque
@@ -268,6 +269,7 @@ class Board {
 		return newBoard;
 	}
 
+	// Guarda todos os movimentos possíveis desse turno no histórico
 	setAllPossibleMovementsHistory(){
 		this.allPossibleMovementsHistory.push(this.allPossibleMovements);
 	}
@@ -333,7 +335,7 @@ class Board {
 		this.switchTurn();
 	}
 
-	// Mostra todas as posições que a peça clicada pode tentar
+	// Mostra todas as posições que a peça clicada pode tentar mover
 	drawPossibleMovements(){
 		document.querySelectorAll(".possible").forEach(cell => cell.classList.remove("possible"))
 		if(this.selectedPiece){
