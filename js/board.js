@@ -163,7 +163,7 @@ class Board {
 	// Faz a jogada da AI
 	playAI() {
 		if(this.currentPlayer === 'white'){
-			this.computer.chooseMove(this.allPossibleMovements);
+			this.computer.chooseMove(this.allPossibleMovements, this);
 		}
 	}
 
@@ -173,7 +173,10 @@ class Board {
 		this.setAllPossibleMovements();
 		this.checkGameEnd();
 		this.setAllPossibleMovementsHistory();
-		this.playAI();
+		let thisBoard = this;
+		setTimeout(function(){
+			thisBoard.playAI();
+		}, 500);
 	}
 
 	// Adiciona um movimento para o histórico de jogadas
@@ -395,6 +398,19 @@ class Board {
 		}
 	}
 
+	// motivos de IA
+	moveOnly(move) {
+		if (move.target != null) {
+			this.killPiece(move.to.row, move.to.col);
+		}
+		this.setAllPossibleMovements();
+		let piece = this.pieces.find(x => x.row === move.from.row && x.col === move.from.col);
+		piece.row = move.from.row;
+		piece.col = move.from.col;
+
+		this.currentPlayer = this.currentPlayer === COMPUTER_COLOR ? PLAYER_COLOR : COMPUTER_COLOR;
+	}
+
 	clearSelectedPiece(oldPieceCell) {
 		oldPieceCell.classList.remove("selected");
 		this.selectedCell.classList.remove("selected");
@@ -487,5 +503,32 @@ class Board {
 		this.setAllPossibleMovements();
 		this.setAllPossibleMovementsHistory();
 		parent.appendChild(table);
+	}
+
+	evalPieceValues(color) {
+		let value = 0;
+		for (let piece of this.pieces) {
+			value += piece.color === color ? piece.pieceValue : -1 * piece.pieceValue;
+		}
+
+		return value;
+	}
+
+	evalMobilityValues(color) {
+		return this.pieces.filter(x => x.color === color).length - this.pieces.filter(x => x.color != color).length ;
+	}
+
+	evalPawnValues(color) {
+		let value = 0;
+		let allPawnPieces = this.pieces.filter(x => x.type === "pawn");
+		for (let piece of allPawnPieces) {
+			if (piece.color === color) {
+				value += color === "white" ? 6 - piece.row : piece.row - 1;
+			} else {
+				value -= color === "white" ? piece.row - 1 : 6 - piece.row;
+			}
+		}
+
+		return value;
 	}
 }
