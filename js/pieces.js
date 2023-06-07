@@ -7,6 +7,22 @@ const pieceEmoji = {
 	pawn: { white: "♙", black: "♟︎" },
 };
 
+class Position {
+	constructor(row, col) {
+		this.row = row;
+		this.col = col;
+	}
+}
+
+class Move {
+	constructor(piece, from, to, target) {
+		this.piece = piece;
+		this.from = from;
+		this.to = to;
+		this.target = target;
+	}
+}
+
 class Piece {
 	constructor(color, row, col) {
 		this.color = color;
@@ -14,23 +30,58 @@ class Piece {
 		this.col = col;
 	}
 
-	move(row, col) {
-		board.addMove(this, {row: this.row, col: this.col}, {row: row, col: col} )
-		this.row = row;
-		this.col = col;
-
+	getPosition() {
+		return [this.row, this.col];
 	}
 
-	getPossibleMovements(board){
-		let availablePositions = []
+	copyPiece() {
+		let newPiece = Object.assign(Object.create(Object.getPrototypeOf(this)), this);
+		return newPiece;
+	}
+
+	getEnemyColor() {
+		return this.color === "white" ? "black" : "white";
+	}
+
+	move(row, col, playerBoard = board) {
+		playerBoard.addMove(new Move(this, new Position(this.row, this.col), new Position(row, col), board.getPiece(row, col)))
+		this.row = row;
+		this.col = col;
+	}
+
+	getPossibleMovements(board, validAndSafe = false) {
+		let availableMoves = []
 		board.squares.forEach((row, rowIndex) => {
 			row.forEach((col, colIndex) => {
-				if((board.isEmpty(rowIndex, colIndex) || board.isOpponent(rowIndex, colIndex)) && this.isValidMove(rowIndex, colIndex)){
-					availablePositions.push([rowIndex, colIndex])
+				if ((board.isEmpty(rowIndex, colIndex) || board.isOpponent(rowIndex, colIndex, this.color))) {
+					if (validAndSafe && this.isValidAndSafeMove(rowIndex, colIndex, board) || (!validAndSafe && this.isValidMove(rowIndex, colIndex, board))) {
+						availableMoves.push(new Move(this, new Position(this.row, this.col), new Position(rowIndex, colIndex), board.getPiece(rowIndex, colIndex)))
+					}
 				}
 			})
 		})
-		return availablePositions
+		return availableMoves
+	}
+
+	isValidAndSafeMove(newRow, newCol, playerBoard = board) {
+		return this.isValidMove(newRow, newCol, playerBoard) && this.isSafeMove(newRow, newCol)
+	}
+
+	checkSamePos(piece) {
+		return (piece?.row === this.row && piece?.col === this.col)
+	}
+
+	isSafeMove(row, col) {
+		let pseudoBoard  = board.copyBoard();
+		let pseudoPiece = this.copyPiece()
+		let targetPiece = pseudoBoard.getPiece(row, col)
+		pseudoBoard.pieces = pseudoBoard.pieces.filter(piece => !(piece.checkSamePos(pseudoPiece) || piece.checkSamePos(targetPiece)))
+
+		pseudoPiece.row = row;
+		pseudoPiece.col = col;
+		
+		pseudoBoard.pieces.push(pseudoPiece)
+		return !pseudoBoard.isInCheck(pseudoPiece?.color);
 	}
 
 	draw(parent) {
@@ -71,13 +122,13 @@ class King extends Piece {
 	}
 
 	//valida a jogada do roque
-	isValidCastleMove(newRow, newCol) {
+	isValidCastleMove(newRow, newCol, playerBoard = board) {
 		if (newRow === this.row && !this.hasMoved) {
 			//para a torre à direita
 			if (newCol === this.col + 2) {
 				let auxCol = this.col
 				while (auxCol <= 7) {
-					let pieceCheck = board.getPiece(this.row, ++auxCol)
+					let pieceCheck = playerBoard.getPiece(this.row, ++auxCol)
 
 					if (pieceCheck && pieceCheck.type !== 'rook') return false
 
@@ -91,7 +142,7 @@ class King extends Piece {
 			else if (newCol === this.col - 2) {
 				let auxCol = this.col
 				while (auxCol >= 0) {
-					let pieceCheck = board.getPiece(this.row, --auxCol)
+					let pieceCheck = playerBoard.getPiece(this.row, --auxCol)
 
 					if (pieceCheck && pieceCheck.type !== 'rook') return false
 
@@ -112,7 +163,8 @@ class Queen extends Piece {
 		this.type = "queen";
 	}
 
-	isValidMove(newRow, newCol) {
+	isValidMove(newRow, newCol, playerBoard = board) {
+		// if (!super.isMoveSafe(newRow, newCol)) return false;
 		// verificando se é a mesma posição
 		if (newRow === this.row && newCol === this.col) return false;
 		// verifique se o movimento é válido na vertical, horizontal ou diagonal
@@ -124,7 +176,7 @@ class Queen extends Piece {
 			let checkRow = this.row + deltaRow;
 			let checkCol = this.col + deltaCol;
 			while (checkRow !== newRow || checkCol !== newCol) {
-				if (board.isEmpty(checkRow, checkCol) === false) return false;
+				if (playerBoard.isEmpty(checkRow, checkCol) === false) return false;
 				checkRow += deltaRow;
 				checkCol += deltaCol;
 			}
@@ -142,76 +194,27 @@ class Bishop extends Piece {
 		this.type = "bishop";
 	}
 
-	possibleMoves = [];
-	calculatePossibleMoves() {
-		let possibleRow = this.row;
-		let possibleCol = this.col;
-		this.possibleMoves = [];
-		while (possibleRow !== 0 && possibleCol !== 0) {
-			possibleRow -= 1;
-			possibleCol -= 1;
-			if (board.isEmpty(possibleRow, possibleCol) || board.isOpponent(possibleRow, possibleCol)) {
-				this.possibleMoves.push([possibleRow, possibleCol]);
-			} else {
-				break;
+	isValidMove(newRow, newCol,  playerBoard = board) {
+		// verificando se é a mesma posição
+		if (newRow === this.row && newCol === this.col) return false;
+		// verifique se o movimento é válido na diagonal
+		if (Math.abs(newRow - this.row) === Math.abs(newCol - this.col)) {
+			// determinando a direção (delta) do movimento (0 = parado)
+			const deltaRow = newRow - this.row > 0 ? 1 : newRow - this.row < 0 ? -1 : 0; // 1 = direita, -1 = esquerda
+			const deltaCol = newCol - this.col > 0 ? 1 : newCol - this.col < 0 ? -1 : 0; // 1 = cima, -1 = baixo
+			// verificando se existem peças no caminho
+			let checkRow = this.row + deltaRow;
+			let checkCol = this.col + deltaCol;
+			while (checkRow !== newRow || checkCol !== newCol) {
+				if (playerBoard.isEmpty(checkRow, checkCol) === false) return false;
+				checkRow += deltaRow;
+				checkCol += deltaCol;
 			}
-		}
-
-		possibleRow = this.row;
-		possibleCol = this.col;
-		while (possibleRow !== 0 && possibleCol !== 7) {
-			possibleRow -= 1;
-			possibleCol += 1;
-			if (board.isEmpty(possibleRow, possibleCol) || board.isOpponent(possibleRow, possibleCol)) {
-				this.possibleMoves.push([possibleRow, possibleCol]);
-			} else {
-				break;
-			}
-		}
-
-		possibleRow = this.row;
-		possibleCol = this.col;
-		while (possibleRow !== 7 && possibleCol !== 0) {
-			possibleRow += 1;
-			possibleCol -= 1;
-			if (board.isEmpty(possibleRow, possibleCol) || board.isOpponent(possibleRow, possibleCol)) {
-				this.possibleMoves.push([possibleRow, possibleCol]);
-			} else {
-				break;
-			}
-		}
-
-		possibleRow = this.row;
-		possibleCol = this.col;
-		while (possibleRow !== 7 && possibleCol !== 7) {
-			possibleRow += 1;
-			possibleCol += 1;
-			if (board.isEmpty(possibleRow, possibleCol) || board.isOpponent(possibleRow, possibleCol)) {
-				this.possibleMoves.push([possibleRow, possibleCol]);
-			} else {
-				break;
-			}
-		}
-	}
-
-	isValidMove(row, col) {
-		this.calculatePossibleMoves();
-		function compareArray(matrix) {
-			if (
-				matrix.find(
-					(element) => JSON.stringify(element) === JSON.stringify([row, col])
-				) &&
-				board.isEmpty()
-			)
-				return true;
-			return false;
-		}
-
-		if (compareArray(this.possibleMoves)) {
-			this.calculatePossibleMoves();
+			// não tem peças no caminho
 			return true;
 		}
-		return false;
+		// caso contrário, movimento é inválido
+		return false
 	}
 }
 
@@ -221,7 +224,7 @@ class Knight extends Piece {
 		this.type = "knight";
 	}
 
-	isValidMove(targetRow, targetCol) {
+	isValidMove(targetRow, targetCol, playerBoard = board) {
 		if (targetCol === this.col + 2 || targetCol === this.col - 2) {
 			if (targetRow === this.row + 1 || targetRow === this.row - 1) {
 				return true;
@@ -252,20 +255,20 @@ class Rook extends Piece {
 		super.move(row, col)
 	}
 
-	isValidMove(row, col) {
+	isValidMove(row, col, playerBoard = board) {
 		if (this.row === row || this.col === col) {
 			let cells = [];
 			if (this.row === row) {
 				let start = this.col < col ? this.col : col;
 				let end = this.col < col ? col : this.col;
 				for (let i = start + 1; i < end; i++) {
-					cells.push(board.getPiece(row, i));
+					cells.push(playerBoard.getPiece(row, i));
 				}
 			} else {
 				let start = this.row < row ? this.row : row;
 				let end = this.row < row ? row : this.row;
 				for (let i = start + 1; i < end; i++) {
-					cells.push(board.getPiece(i, col));
+					cells.push(playerBoard.getPiece(i, col));
 				}
 			}
 			if (cells.some((cell) => cell)) {
@@ -283,19 +286,19 @@ class Pawn extends Piece {
 		this.type = "pawn";
 	}
 
-	isValidMove(newRow, newCol) {
+	isValidMove(newRow, newCol, playerBoard = board) {
 		// Verifique se a nova posição é uma casa vazia na mesma coluna
-		if (this.col === newCol && board.isEmpty(newRow, newCol)) {
+		if (this.col === newCol && playerBoard.isEmpty(newRow, newCol)) {
 			// O peão pode se mover uma ou duas casas para frente na sua primeira jogada
 			if (this.color === "white") {
-				if (this.row === 1 && newRow === 3) {
+				if ((this.row === 1 && newRow === 3) && board.isEmpty(newRow - 1, newCol)) {
 					return true;
 				}
 				if (newRow === this.row + 1) {
 					return true;
 				}
 			} else {
-				if (this.row === 6 && newRow === 4) {
+				if ((this.row === 6 && newRow === 4) && board.isEmpty(newRow + 1, newCol)) {
 					return true;
 				}
 				if (newRow === this.row - 1) {
@@ -306,7 +309,7 @@ class Pawn extends Piece {
 		// Verifique se a nova posição é uma captura diagonal
 		else if (
 			Math.abs(this.col - newCol) === 1 &&
-			board.isOpponent(newRow, newCol, this.color)
+			playerBoard.isOpponent(newRow, newCol, this.color)
 		) {
 			// O peão só pode fazer uma captura diagonal
 			if (this.color === "white" && newRow === this.row + 1) {
@@ -317,12 +320,12 @@ class Pawn extends Piece {
 		}
 
 		// Verifica en passant
-		const lastMove = board.getLastMove();
+		const lastMove = playerBoard.getLastMove();
 		if (lastMove && lastMove.piece instanceof Pawn && lastMove.to.row === this.row && Math.abs(lastMove.to.col - this.col) === 1 && Math.abs(lastMove.from.row - this.row) === 2) {
-			const capturedPawn = board.getPiece(lastMove.to.row, lastMove.to.col);
+			const capturedPawn = playerBoard.getPiece(lastMove.to.row, lastMove.to.col);
 			if (capturedPawn && capturedPawn.color !== this.color) {
-				board.killPiece(capturedPawn.row, capturedPawn.col);
-				return  true;
+				playerBoard.killPiece(capturedPawn.row, capturedPawn.col);
+				return true;
 			}
 		};
 

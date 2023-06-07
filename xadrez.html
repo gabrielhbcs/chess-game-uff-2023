@@ -3,6 +3,7 @@
 <head>
 	<title>Tabuleiro de Xadrez</title>
 	<script src="js/board.js"></script>
+	<script src="js/computer.js"></script>
 	<script src="js/pieces.js"></script>
 	<script src="js/main.js"></script>
 	<script src="js/global.js"></script>
@@ -18,7 +19,6 @@
 		<a class="navbar-btn" id="desistir">Desistir</a>
 	</nav>
 	<div id="board"></div>
-
 	<div id="promote-pawn" class="modal">
 		<div class="modal-content">
 			<h2>Seu peão foi promovido!</h2>
@@ -38,5 +38,14 @@
 			</div>
 		</div>
 		</div>
+	<div id="modal" class="modal">
+		<div class="modal-content">
+		  <span onclick="board.fecharModal()" style="float: right; cursor: pointer;">&times;</span>
+		  <div id="modal-text">
+			  <!-- Conteúdo do modal será adicionado aqui -->
+			</div>
+		  <a class="navbar-btn" href="/xadrez.html"><button>Reiniciar</button></a>
+		</div>
+	  </div>
 </body>
 </html>
