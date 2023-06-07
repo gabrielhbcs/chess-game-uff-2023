@@ -147,13 +147,7 @@ class Board {
 		this.setAllPossibleMovements();
 		this.checkGameEnd();
 		this.setAllPossibleMovementsHistory();
-
-		if (this.isCheckmate(this.allPossibleMovements, this.currentPlayer)) {
-			console.log("Cheque mate!");
-		} else if (this.isCheck(this.allPossibleMovements, this.currentPlayer)) {
-			console.log("Cheque!");
-		}
-		if(this.currentPlayer === "white") this.playAI();
+		this.playAI();
 	}
 
 	// Adiciona um movimento para o histórico de jogadas
