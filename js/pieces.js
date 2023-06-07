@@ -30,6 +30,10 @@ class Piece {
 		this.col = col;
 	}
 
+	getPosition() {
+		return [this.row, this.col];
+	}
+
 	copyPiece() {
 		let newPiece = Object.assign(Object.create(Object.getPrototypeOf(this)), this);
 		return newPiece;
@@ -63,14 +67,19 @@ class Piece {
 		return this.isValidMove(newRow, newCol, playerBoard) && this.isSafeMove(newRow, newCol)
 	}
 
+	checkSamePos(piece) {
+		return (piece?.row === this.row && piece?.col === this.col)
+	}
+
 	isSafeMove(row, col) {
 		let pseudoBoard  = board.copyBoard();
 		let pseudoPiece = this.copyPiece()
+		let targetPiece = pseudoBoard.getPiece(row, col)
+		pseudoBoard.pieces = pseudoBoard.pieces.filter(piece => !(piece.checkSamePos(pseudoPiece) || piece.checkSamePos(targetPiece)))
+
 		pseudoPiece.row = row;
 		pseudoPiece.col = col;
 		
-		let targetPiece = pseudoBoard.getPiece(row, col)
-		pseudoBoard.pieces = pseudoBoard.pieces.filter(piece => !(piece == pseudoBoard.selectedPiece || piece == targetPiece))
 		pseudoBoard.pieces.push(pseudoPiece)
 		return !pseudoBoard.isInCheck(pseudoPiece?.color);
 	}

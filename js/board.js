@@ -114,7 +114,13 @@ class Board {
 		this.setAllPossibleMovements();
 		this.checkTie();
 		this.setAllPossibleMovementsHistory();
-		this.playAI();
+
+		if (this.isCheckmate(this.allPossibleMovements, this.currentPlayer)) {
+			console.log("Cheque mate!");
+		} else if (this.isCheck(this.allPossibleMovements, this.currentPlayer)) {
+			console.log("Cheque!");
+		}
+		if(this.currentPlayer === "white") this.playAI();
 	}
 	
 	addMove(piece, from, to, target) {
@@ -127,8 +133,7 @@ class Board {
 		let enemyPieces = this.pieces.filter(x => x.color != color);
 		let isInCheck = false;
 		enemyPieces.forEach(piece => {
-			if (piece.isValidMove(king?.row, king?.col, this)) {
-				console.log("traidor")
+			if (piece.isValidMove(king.row, king.col, this)) {
 				isInCheck =  true;
 				return;
 			}
@@ -150,7 +155,7 @@ class Board {
 	}
 
 	hasValidMoves(possibleMoves) {
-		for (move of possibleMoves) {
+		for (let move of possibleMoves) {
 			if (move.piece.color === this.currentPlayer) return true;
 		}
 		return false;
@@ -350,7 +355,6 @@ class Board {
 							const _isValidMove = this.selectedPiece.isValidAndSafeMove(row, col, this);
 							const _isOpponent = this.isOpponent(row, col, this.selectedPiece.color);
 							if (pieceInCell && _isOpponent && _isValidMove) {
-								console.log("teste1")
 								this.killPiece(row, col);
 								this.movesWithoutCapture = 0;
 								this.movePiece(row, col);
