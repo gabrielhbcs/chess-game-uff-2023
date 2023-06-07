@@ -3,7 +3,7 @@ class Board {
 		this.element = element
 		this.currentPlayer = 'white'
 		this.squares = [];
-		this.moves = [];
+		this.moves = [];   // Pode ser removido
 		this.movesWithoutCapture = 0;
 		this.allPossibleMovements = [];
 		this.allPossibleMovementsHistory = [];
@@ -71,6 +71,7 @@ class Board {
 		return pieces;
 	}
 
+	// Abre o modal de mensagens do jogo
 	openModal(content){
 		var modal = document.getElementById("modal");
 		var modalText = document.getElementById("modal-text");
@@ -80,10 +81,12 @@ class Board {
 		modal.style.display = "block";
 	}
 
+	// Fecha o modal
 	closeModal(){
 		document.getElementById("modal").style.display = "none";
 	}
 
+	// Função de apoio para comparar movimentos no histórico
 	checkEqualMoves(moveOne, moveTwo){
 		for(let j = 0; j < moveTwo.length; j++){
 			if(JSON.stringify(moveOne[j]) !== JSON.stringify(moveTwo[j])){
@@ -93,6 +96,7 @@ class Board {
 		return true
 	}
 
+	// Checa por movimentos repetidos no histórico de jogadas
 	checkRepeatedMoves(){
 		let repeatedMoves = 0;
 		for(let i = 0; i < this.allPossibleMovementsHistory.length; i++){
@@ -114,22 +118,27 @@ class Board {
 			this.openModal(`O jogo terminou. Xequemate em ${this.currentPlayer}.`);
 		}
 		if(this.movesWithoutCapture >= 50){
-			this.openModal('O jogo empatou por quantidade de jogadas sem nenhuma peça ser comida.');
+			this.openModal('O jogo empatou pela regra dos 50 lances.');
 		}
 		if(this.checkRepeatedMoves() >= 3){
-			this.openModal('O jogo empatou por quantidade de jogadas repetidas.');
+			this.openModal('O jogo empatou por tripla repetição.');
 		}
 		if(this.isStalemate() === true){
 			console.log('Stalemate');
 			console.log(this.currentPlayer)
 			console.log(this.allPossibleMovements)
-			this.openModal('O jogo empatou por stalemate.')
+			this.openModal('O jogo empatou por afogamento.')
+		}
+		if(this.isCheck() === true){
+			console.log(`Check em ${this.currentPlayer}!`);
 		}
 	}
 
 	// Faz a jogada da AI
 	playAI() {
-		this.computer.chooseMove(this.allPossibleMovements);
+		if(this.currentPlayer === 'white'){
+			this.computer.chooseMove(this.allPossibleMovements);
+		}
 	}
 
 	// Troca de turno e executa os procedimentos de turno
@@ -154,7 +163,6 @@ class Board {
 	// Retorna true se tiver algum movimento possível para o jogador
 	hasValidMoves() {
 		const playerMoves = this.getAllPlayerMoves(this.currentPlayer, this.pieces , true);
-		//console.log(playerMoves);
 		return playerMoves.some(move => move.piece?.color === this.currentPlayer);
 	}
 
@@ -346,6 +354,7 @@ class Board {
 		}
 	}
 
+	// Método principal para desenhar elementos na tela
 	draw(parent) {
 		let table = document.createElement("table");
 		table.className = "chessboard";

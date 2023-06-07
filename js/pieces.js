@@ -46,6 +46,11 @@ class Piece {
 		return this.color === "white" ? "black" : "white";
 	}
 
+	// Retorna a posição desta peça
+	getPosition() {
+		return [this.row, this.col];
+	}
+
 	// Move a peça e salva o movimento no histórico
 	move(row, col, playerBoard = board) {
 		playerBoard.addMove(new Move(this, new Position(this.row, this.col), new Position(row, col), board.getPiece(row, col)))
@@ -76,14 +81,19 @@ class Piece {
 	// Simula um movimento para saber se ele não coloca seu rei em Xeque
 	isSafeMove(row, col) {
 		let pseudoBoard  = board.copyBoard();
-		let pseudoPiece = this.copyPiece()
+		let pseudoPiece = this.copyPiece();
+		let targetPiece = pseudoBoard.getPiece(row, col)
+		pseudoBoard.pieces = pseudoBoard.pieces.filter(piece => !(piece.checkSamePos(pseudoPiece) || piece.checkSamePos(targetPiece)))
+
 		pseudoPiece.row = row;
 		pseudoPiece.col = col;
-
-		let targetPiece = pseudoBoard.getPiece(row, col)
-		pseudoBoard.pieces = pseudoBoard.pieces.filter(piece => !(piece == pseudoBoard.selectedPiece || piece == targetPiece))
 		pseudoBoard.pieces.push(pseudoPiece)
 		return !pseudoBoard.isCheck();
+	}
+
+	// Verifica se a peça enviada como parâmetro está na mesma posição desta peça
+	checkSamePos(piece) {
+		return (piece?.row === this.row && piece?.col === this.col)
 	}
 
 	// Desenha a peça no campo
