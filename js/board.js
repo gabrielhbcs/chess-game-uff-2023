@@ -347,7 +347,7 @@ class Board {
 		// caso o pawn seja promovido
 		if (type === 'pawn' && this.selectedPiece.isGoingToPromote(newRow)) {
 			this.killPiece(row, col);
-			selectedPiece = null;
+			this.selectedPiece = null;
 
 			const cellForNewPiece = this.squares[newRow][newCol];
 			cellForNewPiece.innerHTML = "";
@@ -359,25 +359,25 @@ class Board {
 				switch (promoted) {
 					case "Queen":
 						const newQueen = new Queen(color, newRow, newCol);
-						pieces.push(newQueen);
+						this.pieces.push(newQueen);
 						newQueen.draw(cellForNewPiece);
 						modal.style.display = "none";
 						break;
 					case "Bishop":
 						const newBishop = new Bishop(color, newRow, newCol);
-						pieces.push(newBishop);
+						this.pieces.push(newBishop);
 						newBishop.draw(cellForNewPiece);
 						modal.style.display = "none";
 						break;
 					case "Knight":
 						const newKnight = new Knight(color, newRow, newCol);
-						pieces.push(newKnight);
+						this.pieces.push(newKnight);
 						newKnight.draw(cellForNewPiece);
 						modal.style.display = "none";
 						break;
 					case "Rook":
 						const newRook = new Rook(color, newRow, newCol);
-						pieces.push(newRook);
+						this.pieces.push(newRook);
 						newRook.draw(cellForNewPiece);
 						modal.style.display = "none";
 						break;
