@@ -7,7 +7,6 @@
 	<script src="js/pieces.js"></script>
 	<script src="js/main.js"></script>
 	<script src="js/global.js"></script>
-	<link rel="stylesheet" href="css/reset.css">
 	<link rel="stylesheet" href="css/style.css">
 
 	<link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,6 +19,25 @@
 		<a class="navbar-btn" id="desistir">Desistir</a>
 	</nav>
 	<div id="board"></div>
+	<div id="promote-pawn" class="modal">
+		<div class="modal-content">
+			<h2>Seu peão foi promovido!</h2>
+			<span>Que tipo de peça ele será?</span>
+			<div id="piece-select">
+				<input type="checkbox" name="piece_type" value="Rook" id="Rook">
+				<label for="Rook">Torre</label>
+
+				<input type="checkbox" name="piece_type" value="Knight" id="Knight"> 
+				<label for="Knight">Cavalo</label>
+
+				<input type="checkbox" name="piece_type" value="Bishop" id="Bishop">
+				<label for="Bishop">Bispo</label>
+
+				<input type="checkbox" name="piece_type" value="Queen" id="Queen">
+				<label for="Queen">Rainha</label>
+			</div>
+		</div>
+		</div>
 	<div id="modal" class="modal">
 		<div class="modal-content">
 		  <span onclick="board.fecharModal()" style="float: right; cursor: pointer;">&times;</span>

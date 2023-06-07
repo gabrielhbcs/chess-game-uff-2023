@@ -4,6 +4,9 @@
   --board-width: calc(var(--num-squares) * var(--square-length));
   --board-height: calc(var(--num-squares) * var(--square-length));
 }
+body {
+  font-family: 'Nunito Sans', sans-serif;
+}
 div#board {
   display: flex;
   justify-content: center;
@@ -66,7 +69,6 @@ nav {
   left: 0;
   display: flex;
   align-items: center;
-  font-family: 'Nunito Sans', sans-serif;
   z-index: 1;
 }
 
@@ -76,12 +78,11 @@ a.navbar-btn {
   display: block;
   color: #fafafa;
 }
-/* ... outras classes para as demais peças do xadrez */
 
 .modal {
   display: none;
   position: fixed;
-  z-index: 2;
+  z-index: 1;
   left: 0;
   top: 0;
   width: 100%;
