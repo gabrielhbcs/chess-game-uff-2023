@@ -10,7 +10,7 @@ class ComputerAI {
         let movement = allComputerMovements[Math.floor(Math.random() * allComputerMovements.length)];
         if (!movement) return;
 
-        this.suggestMove(movement);
+        //this.suggestMove(movement);
         let fromId = this.getRowColId(movement.from.row, movement.from.col);
         let toId = this.getRowColId(movement.to.row, movement.to.col);
         let cellElement = document.getElementById(fromId);
@@ -18,7 +18,7 @@ class ComputerAI {
         let targetCellElement = document.getElementById(toId);
         setTimeout(this.clickBoard, 700, targetCellElement);
     }
-    
+
     clickBoard(cell) {
         const clickEvent = new MouseEvent('click', {
             bubbles: true,

@@ -3,13 +3,37 @@ class Board {
 		this.element = element
 		this.currentPlayer = 'white'
 		this.squares = [];
-		this.moves = [];
+		this.moves = [];   // Pode ser removido
 		this.movesWithoutCapture = 0;
 		this.allPossibleMovements = [];
 		this.allPossibleMovementsHistory = [];
 		this.selectedPiece = null;
 		this.computer = new ComputerAI()
-		this.pieces = [
+		this.pieces = this.createPieces()
+		this.selectedCell = null;
+		this.createSquares();
+	}
+
+	// Desenha os squares na tela
+	createSquares(){
+		for (let i = 0; i < 8; i++) {
+			this.squares[i] = [];
+			for (let j = 0; j < 8; j++) {
+				let square = document.createElement("div");
+				square.className = "square";
+				if ((i + j) % 2 == 0) {
+					square.classList.add("white");
+				} else {
+					square.classList.add("black");
+				}
+				this.squares[i][j] = square;
+			}
+		}
+	}
+
+	// Coloca todas as peças no campo para começar um novo jogo
+	createPieces(){
+		const pieces = [
 			new Rook("white", 0, 0),
 			new Knight("white", 0, 1),
 			new Bishop("white", 0, 2),
@@ -26,7 +50,7 @@ class Board {
 			new Pawn("white", 1, 5),
 			new Pawn("white", 1, 6),
 			new Pawn("white", 1, 7),
-			
+
 			new Pawn("black", 6, 0),
 			new Pawn("black", 6, 1),
 			new Pawn("black", 6, 2),
@@ -44,36 +68,25 @@ class Board {
 			new Knight("black", 7, 6),
 			new Rook("black", 7, 7)
 		];
-		this.selectedCell = null;
-		for (let i = 0; i < 8; i++) {
-			this.squares[i] = [];
-			for (let j = 0; j < 8; j++) {
-				let square = document.createElement("div");
-				square.className = "square";
-				if ((i + j) % 2 == 0) {
-					square.classList.add("white");
-				} else {
-					square.classList.add("black");
-				}
-				this.squares[i][j] = square;
-			}
-			
-		}
+		return pieces;
 	}
 
+	// Abre o modal de mensagens do jogo
 	openModal(content){
 		var modal = document.getElementById("modal");
 		var modalText = document.getElementById("modal-text");
 		modalText.innerHTML = "";
 		modalText.innerHTML = content;
-		
+
 		modal.style.display = "block";
 	}
 
+	// Fecha o modal
 	closeModal(){
 		document.getElementById("modal").style.display = "none";
 	}
 
+	// Função de apoio para comparar movimentos no histórico
 	checkEqualMoves(moveOne, moveTwo){
 		for(let j = 0; j < moveTwo.length; j++){
 			if(JSON.stringify(moveOne[j]) !== JSON.stringify(moveTwo[j])){
@@ -83,11 +96,12 @@ class Board {
 		return true
 	}
 
+	// Checa por movimentos repetidos no histórico de jogadas
 	checkRepeatedMoves(){
 		let repeatedMoves = 0;
 		for(let i = 0; i < this.allPossibleMovementsHistory.length; i++){
 			let isRepeated = this.checkEqualMoves(this.allPossibleMovements, this.allPossibleMovementsHistory[i]);
-			
+
 			if(isRepeated){
 				repeatedMoves += 1;
 			}
@@ -95,56 +109,96 @@ class Board {
 		return repeatedMoves;
 	}
 
-	checkTie(){
+	// Checa as condições para encerrar o jogo
+	checkGameEnd(){
+		if(this.isCheckmate() === true){
+			console.log('Xequemate');
+			console.log(this.currentPlayer)
+			console.log(this.allPossibleMovements)
+			this.openModal(`O jogo terminou. Xequemate em ${this.currentPlayer}.`);
+		}
 		if(this.movesWithoutCapture >= 50){
-			this.openModal('O jogo empatou por quantidade de jogadas sem nenhuma peça ser comida.');
+			this.openModal('O jogo empatou pela regra dos 50 lances.');
 		}
 		if(this.checkRepeatedMoves() >= 3){
-			this.openModal('O jogo empatou por quantidade de jogadas repetidas.');
+			this.openModal('O jogo empatou por tripla repetição.');
+		}
+		if(this.isStalemate() === true){
+			console.log('Stalemate');
+			console.log(this.currentPlayer)
+			console.log(this.allPossibleMovements)
+			this.openModal('O jogo empatou por afogamento.')
+		}
+		if(this.isCheck() === true){
+			console.log(`Check em ${this.currentPlayer}!`);
 		}
 	}
 
+	// Faz a jogada da AI
 	playAI() {
-		this.computer.chooseMove(this.allPossibleMovements);
-	}
-
-	switchTurn(){
-		this.currentPlayer = this.currentPlayer === "white" ? "black" : "white"
-
-		this.setAllPossibleMovements();
-		this.checkTie();
-		this.setAllPossibleMovementsHistory();
-
-		if (this.isCheckmate(this.allPossibleMovements, this.currentPlayer)) {
-			console.log("Cheque mate!");
-		} else if (this.isCheck(this.allPossibleMovements, this.currentPlayer)) {
-			console.log("Cheque!");
+		if(this.currentPlayer === 'white'){
+			this.computer.chooseMove(this.allPossibleMovements);
 		}
-		if(this.currentPlayer === "white") this.playAI();
 	}
-	
+
+	// Troca de turno e executa os procedimentos de turno
+	switchTurn(){
+		this.currentPlayer = this.getNextPlayer();
+		this.setAllPossibleMovements();
+		this.checkGameEnd();
+		this.setAllPossibleMovementsHistory();
+		this.playAI();
+	}
+
+	// Adiciona um movimento para o histórico de jogadas
 	addMove(piece, from, to, target) {
-		this.moves.push({ piece: piece, from: from, to: to });
+		this.moves.push({ piece: piece, from: from, to: to, target: target });
 	}
 
-	isInCheck(color) {
-		if(!color) return false;
-		let king = this.pieces.find(x => x.type === "king" && x.color === color);
-		let enemyPieces = this.pieces.filter(x => x.color != color);
-		let isInCheck = false;
-		enemyPieces.forEach(piece => {
-			if (piece.isValidMove(king.row, king.col, this)) {
-				isInCheck =  true;
-				return;
-			}
-		})
-		return isInCheck;
-	}
-
+	// Retorna a jogada mais recente do histórico
 	getLastMove() {
 		return this.moves.length > 0 ? this.moves[this.moves.length - 1] : null;
 	}
 
+	// Retorna true se tiver algum movimento possível para o jogador
+	hasValidMoves() {
+		const playerMoves = this.getAllPlayerMoves(this.currentPlayer, this.pieces , true);
+		return playerMoves.some(move => move.piece?.color === this.currentPlayer);
+	}
+
+	// Checa se jogador atual está em Xeque
+	isCheck(){
+		const opponentMoves = this.getAllPlayerMoves(this.getNextPlayer());
+		return opponentMoves.some(move => move.target?.type === 'king');
+	}
+
+	// O rei deve estar em xeque e o jogador não deve possuir movimentos válidos
+	isCheckmate() {
+		return this.isCheck() && !this.hasValidMoves();
+	}
+
+	// O rei não deve estar em xeque e o jogador não deve possuir movimentos válidos
+	isStalemate() {
+		return !this.isCheck() && !this.hasValidMoves();
+	}
+
+	// Checa se na posição tem uma peça do oponente
+	isOpponent(row, col, color) {
+		let piece = this.getPiece(row, col);
+		if (color && piece)
+			return !(piece.color == color);
+		return false;
+	}
+
+	// Checa se na posição tem uma peça do jogador
+	isPlayer(row, col, color){
+		let piece = this.getPiece(row, col);
+		if (color && piece)
+			return (piece.color == color);
+		return false;
+	}
+
+	// Checa se não tem nenhuma peça na posição
 	isEmpty(row, col) {
 		for (let piece of this.pieces) {
 			if (piece.row === row && piece.col === col) {
@@ -154,62 +208,17 @@ class Board {
 		return true;
 	}
 
-	hasValidMoves(possibleMoves) {
-		for (let move of possibleMoves) {
-			if (move.piece.color === this.currentPlayer) return true;
-		}
-		return false;
+	// Retorna uma string com o nome do próximo jogador
+	getNextPlayer(){
+		return this.currentPlayer === "white" ? "black" : "white";
 	}
 
-	isCheck(possibleMoves, color) {
-		let isInCheck = false;
-		possibleMoves.forEach((move) => {
-			if (move.target?.type === "king" && move.target?.color === color) {
-				isInCheck = true;
-				return;
-			}
-		})
-		return isInCheck;
-	}
-
-	isCheckmate(possibleMoves, color) {
-		// O Rei deve estar em xeque
-		const isKingInCheck = this.isCheck(possibleMoves, color);
-		if (!isKingInCheck) return false;
-
-		// Não deve existir movimentos válidos
-		const hasValidMove = this.hasValidMoves(possibleMoves);
-		if (hasValidMove) return false;
-
-		// Nesse caso, é Xeque Mate
-		return true;
-	}
-
-	isStalemate(possibleMoves, color) {
-		// O Rei não pode estar em xeque
-		const isKingInCheck = this.isCheck(possibleMoves, color);
-		if (isKingInCheck) return false;
-
-		// Não deve existir movimentos válidos
-		const hasValidMove = this.hasValidMoves(possibleMoves);
-		if (hasValidMove) return false;
-
-		// Nesse caso, é Stalemate
-		return true;
-	}
-
-	isOpponent(row, col, color) {
-		// verifica se a peça em row, col é inimiga de "color"
-		let piece = this.getPiece(row, col);
-		if (color && piece)
-			return !(piece.color == color);
-		return false;
-	}
-
+	// Retorna um square do campo
 	getCell(row, col) {
 		return this.squares[row][col];
 	}
 
+	// Retorna um objeto do tipo Piece que está nesta posição
 	getPiece(row, col) {
 		for (let piece of this.pieces) {
 			if (piece.row === row && piece.col === col) {
@@ -219,6 +228,7 @@ class Board {
 		return null;
 	}
 
+	// Remove uma peça do campo
 	killPiece(row, col) {
 		const killedPiece = this.getPiece(row, col);
 		const filteredPieces = this.pieces.filter((piece) => piece !== killedPiece);
@@ -228,6 +238,19 @@ class Board {
 		cell.innerHTML = "";
 	}
 
+	// Retorna todos os movimentos do jogador selecionado
+	getAllPlayerMoves(player, allPieces = this.pieces, valid = false){
+		return allPieces
+		.filter(piece => piece.color === player)
+		.flatMap(piece => piece.getPossibleMovements(this, valid));
+	}
+
+	// Retorna todos os movimentos possíveis de ambos jogadores
+	getAllPossibleMovements(pseudoPieces = this.pieces){
+		return pseudoPieces.flatMap(piece => piece.getPossibleMovements(this, true));
+	}
+
+	// Coloca todas os movimentos válidos na variável de movimentos possíveis
 	setAllPossibleMovements(){
 		this.allPossibleMovements = this.getAllPossibleMovements().filter(move => {
 			const { piece, from, to } = move;
@@ -235,24 +258,31 @@ class Board {
 		  });
 	}
 
-	getAllPossibleMovements(pseudoPieces = this.pieces){
-		let allPossibleMovements = []
-		pseudoPieces.forEach(piece => {
-			allPossibleMovements = allPossibleMovements.concat(piece.getPossibleMovements(this, true));
-		})
-		
-		return allPossibleMovements
+	// Desenha o campo no console apenas para propósito de testes
+	drawBoard() {
+		let chessboard = "";
+		for (let x = 0; x < 8; x++) {
+		  for (let y = 0; y < 8; y++) {
+			const piece = this.getPiece(x, y);
+			chessboard += piece ? piece.getPieceEmoji() : "_ ";
+		  }
+		  chessboard += "\n";
+		}
+		console.log(chessboard);
 	}
 
+	// Cria uma cópia do campo atual
 	copyBoard() {
 		let newBoard = Object.assign(Object.create(Object.getPrototypeOf(this)), this);
 		return newBoard;
-	}	
-	
+	}
+
+	// Guarda todos os movimentos possíveis desse turno no histórico
 	setAllPossibleMovementsHistory(){
 		this.allPossibleMovementsHistory.push(this.allPossibleMovements);
 	}
 
+	// Responsável por mover a peça e fazer movimentos especiais
 	movePiece(newRow, newCol) {
 		if(this.selectedPiece === null) {
 			return;
@@ -304,7 +334,7 @@ class Board {
 			this.selectedPiece.draw(this.squares[newRow][newCol]);
 			this.selectedPiece = null;
 		}
-		
+
 		oldPieceCell.classList.remove("selected");
 		this.selectedCell.classList.remove("selected");
 
@@ -313,6 +343,7 @@ class Board {
 		this.switchTurn();
 	}
 
+	// Mostra todas as posições que a peça clicada pode tentar mover
 	drawPossibleMovements(){
 		document.querySelectorAll(".possible").forEach(cell => cell.classList.remove("possible"))
 		if(this.selectedPiece){
@@ -321,9 +352,9 @@ class Board {
 				this.squares[move.to.row][move.to.col].classList.add("possible")
 			})
 		}
-
 	}
 
+	// Método principal para desenhar elementos na tela
 	draw(parent) {
 		let table = document.createElement("table");
 		table.className = "chessboard";
@@ -350,11 +381,12 @@ class Board {
 						const row = parseInt(target.dataset.row);
 						const col = parseInt(target.dataset.col);
 						let pieceInCell = this.getPiece(row, col);
-						
+
 						if (this.selectedCell && this.selectedCell !== target) {
 							const _isValidMove = this.selectedPiece.isValidAndSafeMove(row, col, this);
 							const _isOpponent = this.isOpponent(row, col, this.selectedPiece.color);
 							if (pieceInCell && _isOpponent && _isValidMove) {
+								console.log(`${this.selectedPiece.getPieceEmoji()} captura ${pieceInCell.getPieceEmoji()}`)
 								this.killPiece(row, col);
 								this.movesWithoutCapture = 0;
 								this.movePiece(row, col);
@@ -374,22 +406,18 @@ class Board {
 							if (pieceInCell.color === "white" && this.currentPlayer === "white" ||
 							pieceInCell.color === "black" && this.currentPlayer === "black") {
 								target.classList.add("selected")
-								
+
 								if (this.selectedCell && this.selectedCell !== target) {
 									this.selectedCell.classList.remove("selected");
 									this.selectedPiece = null;
 								}
 								this.selectedPiece = pieceInCell;
 								this.selectedCell = target;
-
 							}
 						}
 						this.drawPossibleMovements()
-
 					};
-					
 				});
-				
 				row.appendChild(cell);
 				this.squares[i][j] = cell;
 			}

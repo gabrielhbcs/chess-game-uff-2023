@@ -30,25 +30,35 @@ class Piece {
 		this.col = col;
 	}
 
-	getPosition() {
-		return [this.row, this.col];
-	}
-
+	// Cria uma cópia dessa peça
 	copyPiece() {
 		let newPiece = Object.assign(Object.create(Object.getPrototypeOf(this)), this);
 		return newPiece;
 	}
 
+	// Retorna o emoji correspondente a essa peça
+	getPieceEmoji(){
+		return pieceEmoji[this.type][this.color];
+	}
+
+	// Retorna a cor do oponente desta peça
 	getEnemyColor() {
 		return this.color === "white" ? "black" : "white";
 	}
 
+	// Retorna a posição desta peça
+	getPosition() {
+		return [this.row, this.col];
+	}
+
+	// Move a peça e salva o movimento no histórico
 	move(row, col, playerBoard = board) {
 		playerBoard.addMove(new Move(this, new Position(this.row, this.col), new Position(row, col), board.getPiece(row, col)))
 		this.row = row;
 		this.col = col;
 	}
 
+	// Retorna todos os movimentos pseudo-validos ou válidos desta peça
 	getPossibleMovements(board, validAndSafe = false) {
 		let availableMoves = []
 		board.squares.forEach((row, rowIndex) => {
@@ -63,27 +73,30 @@ class Piece {
 		return availableMoves
 	}
 
+	// Um wrapper para os métodos isValidMove e isSafeMove
 	isValidAndSafeMove(newRow, newCol, playerBoard = board) {
 		return this.isValidMove(newRow, newCol, playerBoard) && this.isSafeMove(newRow, newCol)
 	}
 
-	checkSamePos(piece) {
-		return (piece?.row === this.row && piece?.col === this.col)
-	}
-
+	// Simula um movimento para saber se ele não coloca seu rei em Xeque
 	isSafeMove(row, col) {
 		let pseudoBoard  = board.copyBoard();
-		let pseudoPiece = this.copyPiece()
+		let pseudoPiece = this.copyPiece();
 		let targetPiece = pseudoBoard.getPiece(row, col)
 		pseudoBoard.pieces = pseudoBoard.pieces.filter(piece => !(piece.checkSamePos(pseudoPiece) || piece.checkSamePos(targetPiece)))
 
 		pseudoPiece.row = row;
 		pseudoPiece.col = col;
-		
 		pseudoBoard.pieces.push(pseudoPiece)
-		return !pseudoBoard.isInCheck(pseudoPiece?.color);
+		return !pseudoBoard.isCheck();
 	}
 
+	// Verifica se a peça enviada como parâmetro está na mesma posição desta peça
+	checkSamePos(piece) {
+		return (piece?.row === this.row && piece?.col === this.col)
+	}
+
+	// Desenha a peça no campo
 	draw(parent) {
 		let piece = document.createElement("div");
 		piece.className = "piece";
@@ -109,7 +122,7 @@ class King extends Piece {
 		super.move(row, col)
 	}
 
-	isValidMove(newRow, newCol) {
+	isValidMove(newRow, newCol, playerBoard = board) {
 		//verifica se a posição escolhida está à uma cas de distância da posição atual
 		if (newRow === this.row || newRow === this.row - 1 || newRow === this.row + 1) {
 			if (newCol === this.col || newCol === this.col - 1 || newCol === this.col + 1) {
@@ -164,7 +177,6 @@ class Queen extends Piece {
 	}
 
 	isValidMove(newRow, newCol, playerBoard = board) {
-		// if (!super.isMoveSafe(newRow, newCol)) return false;
 		// verificando se é a mesma posição
 		if (newRow === this.row && newCol === this.col) return false;
 		// verifique se o movimento é válido na vertical, horizontal ou diagonal
