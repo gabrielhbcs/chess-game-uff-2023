@@ -143,6 +143,9 @@ class Board {
 			console.log(this.allPossibleMovements)
 			this.openModal(`O jogo terminou. Xequemate em ${this.currentPlayer}.`);
 		}
+		if(this.insufficientMaterial() === true){
+			this.openModal('O jogo empatou por insuficiencia de material.');
+		}
 		if(this.movesWithoutCapture >= 50){
 			this.openModal('O jogo empatou pela regra dos 50 lances.');
 		}
@@ -206,6 +209,14 @@ class Board {
 	// O rei não deve estar em xeque e o jogador não deve possuir movimentos válidos
 	isStalemate() {
 		return !this.isCheck() && !this.hasValidMoves();
+	}
+
+	// Não tem peças o suficiente para realizar um checkmate
+	insufficientMaterial(){
+		const pieceTypes = this.pieces.map(piece => piece.type);
+		if (pieceTypes.length > 4) return false;
+		if (pieceTypes.some(piece => piece === 'pawn' || piece === 'queen' || piece === 'rook')) false;
+		return true;
 	}
 
 	// Checa se na posição tem uma peça do oponente
