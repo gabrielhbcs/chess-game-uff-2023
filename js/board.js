@@ -202,7 +202,7 @@ class Board {
 		this.checkGameEnd();
 		this.setState();
 		console.log(this.getState())
-		this.playAI();
+		// this.playAI();
 	}
 
 	// Adiciona um movimento para o histórico de jogadas

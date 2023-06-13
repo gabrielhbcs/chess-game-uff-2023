@@ -6,6 +6,7 @@
 }
 body {
   font-family: 'Nunito Sans', sans-serif;
+  background: #d7c7a7;
 }
 div#board {
   display: flex;
@@ -62,7 +63,7 @@ table.chessboard {
 }
 
 nav {
-  background: #01022f;
+  background: #8a6d3b; 
   position: fixed;
   top: 0;
   width: 100%;
@@ -74,9 +75,16 @@ nav {
 
 a.navbar-btn {
   text-decoration: none;
-  padding: 24px 48px;
+  padding: 16px 32px; 
   display: block;
-  color: #fafafa;
+  color: #f5f2e8; 
+  font-weight: bold; 
+  font-size: 18px; 
+  transition: background-color 0.3s ease; 
+}
+
+a.navbar-btn:hover {
+  background-color: #7b5f33; 
 }
 
 .modal {
@@ -89,12 +97,72 @@ a.navbar-btn {
   height: 100%;
   overflow: auto;
   background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
 }
-
+  
 .modal-content {
-  background-color: #fefefe;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #8a6d3b; 
   margin: 15% auto;
   padding: 20px;
-  border: 1px solid #888;
-  width: 80%;
+  border: 1px solid #8a6d3b; 
+  width: 50%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  color: white;
+  font-size: 20px;
+}
+.closeBtn {
+  font-size: 40px;
+  align-self: flex-end;
+  margin: 0 15px;
+}
+
+.modal-content a {
+  text-decoration: none;
+}
+  
+#modal-text {
+  font-size: 30px;
+  margin: 50px;
+}
+
+.modal-content button {
+  background-color: #9c7a43;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 20px;
+  margin: 20px;
+  padding: 15px;
+}
+  
+.modal-content button:hover {
+  background-color: #7b5f33;
+}
+
+#piece-select {
+  display: flex;
+  gap: 30px;
+}
+
+.piece-select-div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.piece-select-div label {
+  font-size: 50px;
+  cursor: pointer;
+}
+
+.piece-checkbox {
+  opacity: 1;
+  font-size: 50px;
+  display: none;
 }

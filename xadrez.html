@@ -24,27 +24,35 @@
 			<h2>Seu peão foi promovido!</h2>
 			<span>Que tipo de peça ele será?</span>
 			<div id="piece-select">
-				<input type="checkbox" name="piece_type" value="Rook" id="Rook">
-				<label for="Rook">Torre</label>
-
-				<input type="checkbox" name="piece_type" value="Knight" id="Knight"> 
-				<label for="Knight">Cavalo</label>
-
-				<input type="checkbox" name="piece_type" value="Bishop" id="Bishop">
-				<label for="Bishop">Bispo</label>
-
-				<input type="checkbox" name="piece_type" value="Queen" id="Queen">
-				<label for="Queen">Rainha</label>
+				<div class="piece-select-div">
+					<label for="Rook">♜</label>
+					<input class="piece-checkbox" type="checkbox" name="piece_type" value="Rook" id="Rook">
+				</div>
+				
+				<div class="piece-select-div">
+					<label for="Knight">♞</label>
+					<input class="piece-checkbox" type="checkbox" name="piece_type" value="Knight" id="Knight"> 
+				</div>
+				
+				<div class="piece-select-div">
+					<label for="Bishop">♝</label>
+					<input class="piece-checkbox" type="checkbox" name="piece_type" value="Bishop" id="Bishop">
+				</div>
+				
+				<div class="piece-select-div">	
+					<label for="Queen">♛</label>
+					<input class="piece-checkbox" type="checkbox" name="piece_type" value="Queen" id="Queen">
+				</div>
 			</div>
 		</div>
 		</div>
 	<div id="modal" class="modal">
 		<div class="modal-content">
-		  <span onclick="board.fecharModal()" style="float: right; cursor: pointer;">&times;</span>
+		  <span class="closeBtn" onclick="board.closeModal()" style="float: right; cursor: pointer;">&times;</span>
 		  <div id="modal-text">
 			  <!-- Conteúdo do modal será adicionado aqui -->
 			</div>
-		  <a class="navbar-btn" href="/xadrez.html"><button>Reiniciar</button></a>
+		  <a class="modal-btn" href="/xadrez.html"><button>Reiniciar</button></a>
 		</div>
 	  </div>
 </body>
