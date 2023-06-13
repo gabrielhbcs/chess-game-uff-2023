@@ -29,6 +29,7 @@ class Board {
 		this.element = element
 		this.currentPlayer = 'white'
 		this.squares = [];
+		this.state = '';
 		this.moves = [];   // Pode ser removido
 		this.movesWithoutCapture = 0;
 		this.allPossibleMovements = [];
@@ -139,37 +140,44 @@ class Board {
 		return repeatedMoves;
 	}
 
-	// Seta o gamestate atual
-	setGameState()  {
-		this.isCheckMateBool = this.isCheckmate();
-		this.isCheckBool = this.isCheck();
-		this.isStaleMateBool = this.isStalemate();
-		this.isDrawBool = this.checkRepeatedMoves() >= 3 || this.movesWithoutCapture >= 50;
-	}
-
 	// Checa as condições para encerrar o jogo
 	checkGameEnd() {
-		if (this.isCheckMateBool) {
-			console.log('Xequemate');
-			console.log(this.currentPlayer)
-			console.log(this.allPossibleMovements)
-			this.openModal(`O jogo terminou. Xequemate em ${this.currentPlayer}.`);
-			return;
+		switch (this.getState()) {
+			case GAMESTATES.WHITECHECK:
+				console.log('Peças brancas em Cheque');
+				break;
+			case GAMESTATES.BLACKCHECK:
+				console.log('Peças pretas em Cheque');
+				break;
+			case GAMESTATES.WHITEMATE || GAMESTATES.BLACKMATE:
+				this.openModal(`O jogo terminou. ${this.currentPlayer === COMPUTER_COLOR ? "As máquinas vão dominar o mundo." : "Os seres humanos viverão mais um dia..."}.`);
+			case GAMESTATES.WHITEMATE:
+				console.log('Peças brancas em Chequemate');
+				break;
+			case GAMESTATES.BLACKMATE:
+				console.log('Peças pretas em Chequemate');
+				break;
+			case GAMESTATES.STALEMATE:
+				console.log('Stalemate');
+				break;
+			case GAMESTATES.DRAW:
+				console.log('Draw');
+				break;
+			case GAMESTATES.PLAYING:
+				console.log('Jogando');
+				break;
+			default:
+				console.log('Estado desconhecido');
+				break;
 		}
-		// if (this.movesWithoutCapture >= 50) {
-		// 	this.openModal('O jogo empatou pela regra dos 50 lances.');
-		// }
-		// if (this.checkRepeatedMoves() >= 3) {
-		// 	this.openModal('O jogo empatou por tripla repetição.');
-		// }
-		// if (this.isStalemate() === true) {
-		// 	console.log('Stalemate');
-		// 	console.log(this.currentPlayer)
-		// 	console.log(this.allPossibleMovements)
-		// 	this.openModal('O jogo empatou por afogamento.')
-		// }
 		if (this.isDrawBool) {
 			console.log("Empatou");
+		}
+		if (this.insufficientMaterial() === true) {
+			this.openModal('O jogo empatou por insuficiencia de material.');
+		}
+		if (this.movesWithoutCapture >= 50) {
+			this.openModal('O jogo empatou pela regra dos 50 lances.');
 		}
 		if (this.isCheckBool) {
 			console.log(`Check em ${this.currentPlayer}!`);
@@ -183,15 +191,38 @@ class Board {
 		}
 	}
 
+	isDraw() {
+		return (this.movesWithoutCapture >= 50 || this.checkRepeatedMoves() >= 3)
+	}
+
+	// Muda o estado do jogo
+	setState() {
+		if (this.isCheckmate())
+			this.state = this.currentPlayer == COMPUTER_COLOR ? GAMESTATES.WHITEMATE : GAMESTATES.BLACKMATE;
+		else if (this.isCheck())
+			this.state = this.currentPlayer == COMPUTER_COLOR ? GAMESTATES.WHITECHECK : GAMESTATES.BLACKCHECK;
+		else if (this.isStalemate())
+			this.state = GAMESTATES.STALEMATE;
+		else if (this.isDraw() === true)
+			this.state = GAMESTATES.DRAW;
+		else
+			this.state = GAMESTATES.PLAYING;
+	}
+
+	// Retorna estado atual do jogo
+	getState() {
+		return this.state
+	}
+
 	// Troca de turno e executa os procedimentos de turno
 	switchTurn() {
 		this.currentPlayer = this.getNextPlayer();
-		this.setAllPossibleMovements();
-		this.setGameState();
+		this.setState();
 		this.checkGameEnd();
+		this.setAllPossibleMovements();
 		this.setAllPossibleMovementsHistory();
 		let thisBoard = this;
-		if (!this.isCheckMateBool) {
+		if (this.getState() != GAMESTATES.WHITEMATE) {
 			setTimeout(function () {
 				thisBoard.playAI();
 			}, 500);
@@ -204,6 +235,7 @@ class Board {
 	}
 
 	// Retorna a jogada mais recente do histórico
+
 	getLastMove() {
 		return this.moves.length > 0 ? this.moves[this.moves.length - 1] : null;
 	}
@@ -228,6 +260,14 @@ class Board {
 	// O rei não deve estar em xeque e o jogador não deve possuir movimentos válidos
 	isStalemate() {
 		return !this.isCheck() && !this.hasValidMoves();
+	}
+
+	// Não tem peças o suficiente para realizar um checkmate
+	insufficientMaterial() {
+		const pieceTypes = this.pieces.map(piece => piece.type);
+		if (pieceTypes.length > 4) return false;
+		if (pieceTypes.some(piece => piece === 'pawn' || piece === 'queen' || piece === 'rook')) false;
+		return true;
 	}
 
 	// Checa se na posição tem uma peça do oponente
@@ -283,7 +323,6 @@ class Board {
 
 		this.pieces = [...filteredPieces];
 		const cell = this.squares[row][col];
-		console.log("limpando peça")
 		cell.innerHTML = "";
 	}
 
@@ -301,15 +340,7 @@ class Board {
 
 	// Coloca todas os movimentos válidos na variável de movimentos possíveis
 	setAllPossibleMovements() {
-		this.allPossibleMovements = [];
-		const allPossibleMovements = this.getAllPossibleMovements();
-
-		for (const move of allPossibleMovements) {
-			const { piece, from, to } = move;
-			if (piece.isSafeMove(to.row, to.col)) {
-				this.allPossibleMovements.push(move);
-			}
-		}
+		this.allPossibleMovements = this.getAllPossibleMovements();
 	}
 
 	// Desenha o campo no console apenas para propósito de testes
@@ -327,7 +358,7 @@ class Board {
 
 	// Cria uma cópia do campo atual
 	copyBoard() {
-		let newBoard = Object.assign(Object.create(Object.getPrototypeOf(this)), this);
+		let newBoard = Object.assign(new Board(), this);
 		return newBoard;
 	}
 
@@ -429,13 +460,29 @@ class Board {
 			const killedPiece = this.getPiece(move.to.row, move.to.col);
 			this.pieces = this.pieces.filter((piece) => piece !== killedPiece);
 		}
-		this.setAllPossibleMovements();
 		let piece = this.pieces.find(x => x.row === move.from.row && x.col === move.from.col);
+		piece.row = move.to.row;
+		piece.col = move.to.col;
+		
+		this.setState();
+		this.currentPlayer = this.currentPlayer === COMPUTER_COLOR ? PLAYER_COLOR : COMPUTER_COLOR;
+		this.setAllPossibleMovements();
+		this.drawBoard();
+	}
+
+	// motivos de IA
+	undoMove(move, oldPossibleMovements, oldState) {
+		let piece = this.pieces.find(x => x.row === move.to.row && x.col === move.to.col);
 		piece.row = move.from.row;
 		piece.col = move.from.col;
-
+		
+		if (move.target) {
+			this.pieces.push(move.target);
+		}
+		
 		this.currentPlayer = this.currentPlayer === COMPUTER_COLOR ? PLAYER_COLOR : COMPUTER_COLOR;
-		this.setGameState();
+		this.state = oldState;
+		this.allPossibleMovements = oldPossibleMovements;
 	}
 
 	clearSelectedPiece(oldPieceCell) {
