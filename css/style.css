@@ -79,6 +79,10 @@ a.navbar-btn {
   color: #fafafa;
 }
 
+#modal {
+  display: block;
+}
+
 .modal {
   display: none;
   position: fixed;
@@ -96,5 +100,27 @@ a.navbar-btn {
   margin: 15% auto;
   padding: 20px;
   border: 1px solid #888;
-  width: 80%;
+  width: 50%;
+}
+
+.modal-footer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding-top: 18px;
+}
+
+.modal-btn {
+  text-decoration: none;
+  padding: 12px 24px;
+  color: #fafafa;
+  background-color: #01022f;
+  border-radius: 5px;
+}
+
+.secondary {
+  margin-right: 48px;
+  border: 1px solid #01022f;
+  color: #01022f;
+  background-color: #fafafa;
 }

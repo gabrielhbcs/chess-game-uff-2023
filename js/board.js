@@ -100,15 +100,21 @@ class Board {
 
 	// Abre o modal de mensagens do jogo
 	openModal(content){
-		var modal = document.getElementById("modal");
-		var modalText = document.getElementById("modal-text");
+		const modal = document.getElementById("modal");
+		const modalText = document.getElementById("modal-text");
+		
 		modalText.innerHTML = "";
 		modalText.innerHTML = content;
 
 		modal.style.display = "block";
 	}
 
-	// Fecha o modal
+	giveUp() {
+		console.log('aqui');
+		this.openModal('O jogo terminou por que você desistiu.')
+	}
+
+	// Fecha o modal de fim de jogo
 	closeModal(){
 		document.getElementById("modal").style.display = "none";
 	}
