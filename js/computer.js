@@ -43,15 +43,13 @@ class ComputerAI {
     }
 
     compareMoves(moveA, moveB) {
-        if ((moveA.target && moveB.target) || (!moveA.target && !moveB.target)) {
-            return 0;
-        }
-        if (moveA.target && !moveB.target) {
+        if (moveA.moveValue > moveB.moveValue) {
             return -1;
         }
-        if (!moveA.target && moveB.target) {
+        if (moveA.moveValue < moveB.moveValue) {
             return 1;
         }
+        return 0;
     }
 
     handleNegamax(board, alpha, beta, color) {
@@ -62,11 +60,13 @@ class ComputerAI {
         for (let move of computerMoves) {
             let pseudoBoard = board.copyBoard();
             pseudoBoard.moveOnly(move);
-            console.log("calculando negamax")
+            console.log("Calculando " + computerMoves.length + " movimentos com negamax");
             let v = -this.negamax(pseudoBoard, DEPTH, -beta, -alpha, color === COMPUTER_COLOR ? PLAYER_COLOR : COMPUTER_COLOR);
-            if (v >= bestMoveValue) {
+            if (v >= bestMoveValue - AMPL) {
                 bestMoves.push(move);
-                bestMoveValue = v;
+                if (v >= bestMoveValue){
+                    bestMoveValue = move.moveValue;
+                }
             }
 
             if (bestMoveValue > alpha) {
@@ -88,15 +88,18 @@ class ComputerAI {
             return offSet * this.evalBoard(board);
         }
 
-        if (board.isCheckmate()) {
+        if (board.isCheckMateBool) {
             console.log("Possível checkmate detectado")
             return -CHECKMATE;
         }
-        if (board.isStalemate()) {
+        if (board.isStaleMateBool) {
             return STALEMATE;
         }
-        // ¿donde estás isDraw?
-        if (board.isCheck()) {
+        if (board.isDrawBool) {
+            return DRAW;
+        }
+        if (board.isCheckBool) {
+            console.log("Possível check detectado")
             return CHECK * offSet * this.evalBoard(board);
         }
 

@@ -20,6 +20,47 @@ class Move {
 		this.from = from;
 		this.to = to;
 		this.target = target;
+		this.moveValue = this.calculateMoveValue();
+	}
+
+	// Calcula o valor do movimento (pra IA)
+	calculateMoveValue() {	
+		let moveValue = 0;
+	
+		if (this.target) {
+			moveValue += this.target.pieceValue;
+		}
+
+		let pieceType = this.piece.type;
+		let pieceValue =  0
+	
+		switch (pieceType) {
+			case 'pawn':
+				pieceValue = PAWNPOSITIONVALUES[this.to.row][this.to.col];
+				break;
+			case 'knight':
+				pieceValue = KNIGHTPOSITIONVALUES[this.to.row][this.to.col];
+				break;
+			case 'bishop':
+				pieceValue = BISHOPPOSITIONVALUES[this.to.row][this.to.col];
+				break;
+			case 'rook':
+				pieceValue = ROOKPOSITIONVALUES[this.to.row][this.to.col];
+				break;
+			case 'queen':
+				pieceValue = QUEENPOSITIONVALUES[this.to.row][this.to.col];
+				break;
+			case 'king':
+				pieceValue = KINGPOSITIONVALUES[this.to.row][this.to.col];
+				break;
+			default:
+				console.error('Piece type not recognized: ', pieceType);
+				break;
+		}
+
+		moveValue += pieceValue
+	
+		return moveValue;
 	}
 }
 
@@ -65,7 +106,7 @@ class Piece {
 			row.forEach((col, colIndex) => {
 				if ((board.isEmpty(rowIndex, colIndex) || board.isOpponent(rowIndex, colIndex, this.color))) {
 					if (validAndSafe && this.isValidAndSafeMove(rowIndex, colIndex, board) || (!validAndSafe && this.isValidMove(rowIndex, colIndex, board))) {
-						availableMoves.push(new Move(this, new Position(this.row, this.col), new Position(rowIndex, colIndex), board.getPiece(rowIndex, colIndex)))
+						availableMoves.push(new Move(this, new Position(this.row, this.col), new Position(rowIndex, colIndex), board.getPiece(rowIndex, colIndex), ))
 					}
 				}
 			})
