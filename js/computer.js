@@ -59,9 +59,14 @@ class ComputerAI {
         let bestMoveValue = -Infinity;
         for (let move of computerMoves) {
             let pseudoBoard = board.copyBoard();
+            let oldPossibleMovements = pseudoBoard.allPossibleMovements;
+            let oldState = pseudoBoard.state;
             pseudoBoard.moveOnly(move);
+
             console.log("Calculando " + computerMoves.length + " movimentos com negamax");
             let v = -this.negamax(pseudoBoard, DEPTH, -beta, -alpha, color === COMPUTER_COLOR ? PLAYER_COLOR : COMPUTER_COLOR);
+
+            pseudoBoard.undoMove(move, oldPossibleMovements, oldState);
             if (v >= bestMoveValue - AMPL) {
                 bestMoves.push(move);
                 if (v >= bestMoveValue){
@@ -85,31 +90,36 @@ class ComputerAI {
         let offSet = color === COMPUTER_COLOR ? 1 : -1;
 
         if (depth == 0) {
-            return offSet * this.evalBoard(board);
+            return offSet * this.evalBoard(board.copyBoard());
         }
 
-        if (board.isCheckMateBool) {
+        if (board.getState() === GAMESTATES.WHITEMATE || board.getState() ===  GAMESTATES.BLACKMATE) {
             console.log("Possível checkmate detectado")
             return -CHECKMATE;
         }
-        if (board.isStaleMateBool) {
+        if (board.getState() === GAMESTATES.STALEMATE) {
             return STALEMATE;
         }
-        if (board.isDrawBool) {
+        if (board.getState() === GAMESTATES.DRAW) {
             return DRAW;
         }
-        if (board.isCheckBool) {
-            console.log("Possível check detectado")
+        if (board.getState() === GAMESTATES.WHITECHECK || board.getState() ===  GAMESTATES.BLACKCHECK) {
+            console.log("Possível check detectado");
             return CHECK * offSet * this.evalBoard(board);
         }
 
         let value = -Infinity;
         let moveList = board.allPossibleMovements.filter(x => x.piece.color != color);
+        moveList = moveList.sort(this.compareMoves);
         for (let move of moveList) {
             let pseudoBoard = board.copyBoard();
+            let oldPossibleMovements = pseudoBoard.allPossibleMovements;
+            let oldState = pseudoBoard.state;
             pseudoBoard.moveOnly(move);
 
             let v = -this.negamax(pseudoBoard, depth - 1, -beta, -alpha, color === COMPUTER_COLOR ? PLAYER_COLOR : COMPUTER_COLOR);
+
+            pseudoBoard.undoMove(move, oldPossibleMovements, oldState);
             value = Math.max(value, v);
             alpha = Math.max(alpha, value);
             if (alpha > beta) {

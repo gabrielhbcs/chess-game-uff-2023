@@ -36,22 +36,22 @@ class Move {
 	
 		switch (pieceType) {
 			case 'pawn':
-				pieceValue = PAWNPOSITIONVALUES[this.to.row][this.to.col];
+				pieceValue = PAWNPOSITIONVALUES[this.to.row][this.to.col] * POSWEIGHT;
 				break;
 			case 'knight':
-				pieceValue = KNIGHTPOSITIONVALUES[this.to.row][this.to.col];
+				pieceValue = KNIGHTPOSITIONVALUES[this.to.row][this.to.col] * POSWEIGHT;
 				break;
 			case 'bishop':
-				pieceValue = BISHOPPOSITIONVALUES[this.to.row][this.to.col];
+				pieceValue = BISHOPPOSITIONVALUES[this.to.row][this.to.col] * POSWEIGHT;
 				break;
 			case 'rook':
-				pieceValue = ROOKPOSITIONVALUES[this.to.row][this.to.col];
+				pieceValue = ROOKPOSITIONVALUES[this.to.row][this.to.col] * POSWEIGHT;
 				break;
 			case 'queen':
-				pieceValue = QUEENPOSITIONVALUES[this.to.row][this.to.col];
+				pieceValue = QUEENPOSITIONVALUES[this.to.row][this.to.col] * POSWEIGHT;
 				break;
 			case 'king':
-				pieceValue = KINGPOSITIONVALUES[this.to.row][this.to.col];
+				pieceValue = KINGPOSITIONVALUES[this.to.row][this.to.col] * POSWEIGHT;
 				break;
 			default:
 				console.error('Piece type not recognized: ', pieceType);
@@ -231,7 +231,7 @@ class Queen extends Piece {
 			let checkRow = this.row + deltaRow;
 			let checkCol = this.col + deltaCol;
 			while (checkRow !== newRow || checkCol !== newCol) {
-				if (playerBoard.isEmpty(checkRow, checkCol) === false) return false;
+				if (playerBoard.isEmpty(checkRow, checkCol) === false || (checkCol === newCol && checkRow === newRow && playerBoard.isOpponent(checkRow, checkCol, this.color))) return false;
 				checkRow += deltaRow;
 				checkCol += deltaCol;
 			}
@@ -262,7 +262,7 @@ class Bishop extends Piece {
 			let checkRow = this.row + deltaRow;
 			let checkCol = this.col + deltaCol;
 			while (checkRow !== newRow || checkCol !== newCol) {
-				if (playerBoard.isEmpty(checkRow, checkCol) === false) return false;
+				if (playerBoard.isEmpty(checkRow, checkCol) === false || (checkCol === newCol && checkRow === newRow && playerBoard.isOpponent(checkRow, checkCol, this.color))) return false;
 				checkRow += deltaRow;
 				checkCol += deltaCol;
 			}

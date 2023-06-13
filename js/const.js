@@ -1,6 +1,17 @@
 const COMPUTER_COLOR = "white"
 const PLAYER_COLOR = "black"
 
+// Estados
+const GAMESTATES = {
+    WHITECHECK: 'wcheck',
+    BLACKCHECK: 'bcheck',
+    WHITEMATE: 'wmate',
+    BLACKMATE: 'bmate',
+    STALEMATE: 'stalemate',
+    DRAW: 'draw',
+    PLAYING: 'playing'
+  };
+
 const DEPTH = 2;
 const AMPL = 5;
 
@@ -15,7 +26,7 @@ const CHECK = 2
 const CHECKMATE = (CHECK * ((C1*103) + (C2*215) + (C3*48))) + 1;
 
 // Por posição
-
+const POSWEIGHT = 0.25;
 const PAWNPOSITIONVALUES = [
     [0,  0,  0,  0,  0,  0,  0,  0],
     [50, 50, 50, 50, 50, 50, 50, 50],
