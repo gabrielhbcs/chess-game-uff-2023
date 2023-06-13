@@ -29,6 +29,7 @@ class Board {
 		this.element = element
 		this.currentPlayer = 'white'
 		this.squares = [];
+		this.state = '';
 		this.moves = [];   // Pode ser removido
 		this.movesWithoutCapture = 0;
 		this.allPossibleMovements = [];
@@ -149,6 +150,9 @@ class Board {
 			console.log(this.allPossibleMovements)
 			this.openModal(`O jogo terminou. Xequemate em ${this.currentPlayer}.`);
 		}
+		if(this.insufficientMaterial() === true){
+			this.openModal('O jogo empatou por insuficiencia de material.');
+		}
 		if(this.movesWithoutCapture >= 50){
 			this.openModal('O jogo empatou pela regra dos 50 lances.');
 		}
@@ -165,20 +169,45 @@ class Board {
 			console.log(`Check em ${this.currentPlayer}!`);
 		}
 	}
-
+	
 	// Faz a jogada da AI
 	playAI() {
 		if(this.currentPlayer === 'white'){
 			this.computer.chooseMove(this.allPossibleMovements);
 		}
 	}
-
+	
+	isDraw() {
+		return (this.movesWithoutCapture >= 50 || this.checkRepeatedMoves() >= 3)
+	}
+	
+	// Muda o estado do jogo
+	setState(){
+		if (this.isCheckmate())
+			this.state = this.currentPlayer + 'InCheckmate';
+		else if (this.isCheck())
+			this.state = this.currentPlayer + 'InCheck';
+		else if (this.isStalemate())
+			this.state = 'stalemate';
+		else if (this.isDraw() === true)
+			this.state = 'draw';
+		else
+			this.state = 'playing';
+	}	
+		
+	// Retorna estado atual do jogo
+	getState(){
+		return this.state
+	}
+	
 	// Troca de turno e executa os procedimentos de turno
 	switchTurn(){
 		this.currentPlayer = this.getNextPlayer();
 		this.setAllPossibleMovements();
-		this.checkGameEnd();
 		this.setAllPossibleMovementsHistory();
+		this.checkGameEnd();
+		this.setState();
+		console.log(this.getState())
 		this.playAI();
 	}
 
@@ -186,8 +215,9 @@ class Board {
 	addMove(piece, from, to, target) {
 		this.moves.push({ piece: piece, from: from, to: to, target: target });
 	}
-
+	
 	// Retorna a jogada mais recente do histórico
+
 	getLastMove() {
 		return this.moves.length > 0 ? this.moves[this.moves.length - 1] : null;
 	}
@@ -212,6 +242,14 @@ class Board {
 	// O rei não deve estar em xeque e o jogador não deve possuir movimentos válidos
 	isStalemate() {
 		return !this.isCheck() && !this.hasValidMoves();
+	}
+
+	// Não tem peças o suficiente para realizar um checkmate
+	insufficientMaterial(){
+		const pieceTypes = this.pieces.map(piece => piece.type);
+		if (pieceTypes.length > 4) return false;
+		if (pieceTypes.some(piece => piece === 'pawn' || piece === 'queen' || piece === 'rook')) false;
+		return true;
 	}
 
 	// Checa se na posição tem uma peça do oponente
