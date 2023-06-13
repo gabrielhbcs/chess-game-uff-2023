@@ -108,6 +108,11 @@ class Board {
 		modal.style.display = "block";
 	}
 
+	giveUp() {
+		console.log('aqui');
+		this.openModal('O jogo terminou por que você desistiu.')
+	}
+
 	// Fecha o modal de fim de jogo
 	closeModal(){
 		document.getElementById("modal").style.display = "none";

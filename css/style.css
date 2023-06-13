@@ -107,6 +107,7 @@ a.navbar-btn {
   width: 100%;
   display: flex;
   justify-content: center;
+  padding-top: 18px;
 }
 
 .modal-btn {
