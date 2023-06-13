@@ -29,7 +29,6 @@ class Board {
 		this.element = element
 		this.currentPlayer = 'white'
 		this.squares = [];
-		this.state = '';
 		this.moves = [];   // Pode ser removido
 		this.movesWithoutCapture = 0;
 		this.allPossibleMovements = [];
@@ -163,45 +162,20 @@ class Board {
 			console.log(`Check em ${this.currentPlayer}!`);
 		}
 	}
-	
+
 	// Faz a jogada da AI
 	playAI() {
 		if(this.currentPlayer === 'white'){
 			this.computer.chooseMove(this.allPossibleMovements);
 		}
 	}
-	
-	isDraw() {
-		return (this.movesWithoutCapture >= 50 || this.checkRepeatedMoves() >= 3)
-	}
-	
-	// Muda o estado do jogo
-	setState(){
-		if (this.isCheckmate())
-			this.state = this.currentPlayer + 'InCheckmate';
-		else if (this.isCheck())
-			this.state = this.currentPlayer + 'InCheck';
-		else if (this.isStalemate())
-			this.state = 'stalemate';
-		else if (this.isDraw() === true)
-			this.state = 'draw';
-		else
-			this.state = 'playing';
-	}	
-		
-	// Retorna estado atual do jogo
-	getState(){
-		return this.state
-	}
-	
+
 	// Troca de turno e executa os procedimentos de turno
 	switchTurn(){
 		this.currentPlayer = this.getNextPlayer();
 		this.setAllPossibleMovements();
-		this.setAllPossibleMovementsHistory();
 		this.checkGameEnd();
-		this.setState();
-		console.log(this.getState())
+		this.setAllPossibleMovementsHistory();
 		this.playAI();
 	}
 
@@ -209,9 +183,8 @@ class Board {
 	addMove(piece, from, to, target) {
 		this.moves.push({ piece: piece, from: from, to: to, target: target });
 	}
-	
-	// Retorna a jogada mais recente do histórico
 
+	// Retorna a jogada mais recente do histórico
 	getLastMove() {
 		return this.moves.length > 0 ? this.moves[this.moves.length - 1] : null;
 	}
