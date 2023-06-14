@@ -79,6 +79,32 @@ a.navbar-btn {
   color: #fafafa;
 }
 
+#piece-select {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  font-size: 64px;
+  padding: 24px 0;
+}
+
+#piece-select input {
+  display: none;
+}
+
+#piece-select label {
+  cursor: pointer;
+}
+
+#piece-select p {
+  margin: 0;
+  font-size: 18px;
+}
+
+.upgrade-option {
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+
 .modal {
   display: none;
   position: fixed;
@@ -94,7 +120,29 @@ a.navbar-btn {
 .modal-content {
   background-color: #fefefe;
   margin: 15% auto;
-  padding: 20px;
+  padding: 24px 48px;
   border: 1px solid #888;
-  width: 80%;
+  width: 50%;
+}
+
+.modal-footer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding-top: 18px;
+}
+
+.modal-btn {
+  text-decoration: none;
+  padding: 12px 24px;
+  color: #fafafa;
+  background-color: #01022f;
+  border-radius: 5px;
+}
+
+.secondary {
+  margin-right: 48px;
+  border: 1px solid #01022f;
+  color: #01022f;
+  background-color: #fafafa;
 }

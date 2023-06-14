@@ -17,7 +17,7 @@
 <body>
 	<nav>
 		<a class="navbar-btn" href="/xadrez.html">Reiniciar</a>
-		<a class="navbar-btn" id="desistir">Desistir</a>
+		<a class="navbar-btn" id="desistir" onclick="board.giveUp()">Desistir</a>
 	</nav>
 	<div id="board"></div>
 	<div id="promote-pawn" class="modal">
@@ -26,26 +26,49 @@
 			<span>Que tipo de peça ele será?</span>
 			<div id="piece-select">
 				<input type="checkbox" name="piece_type" value="Rook" id="Rook">
-				<label for="Rook">Torre</label>
+				<label for="Rook">
+					<div class="upgrade-option">
+						♜
+						<p>Torre</p>
+					</div>
+				</label>
 
 				<input type="checkbox" name="piece_type" value="Knight" id="Knight"> 
-				<label for="Knight">Cavalo</label>
+				<label for="Knight">
+					<div class="upgrade-option">
+						♞
+						<p>Cavalo</p>
+					</div>
+				</label>
 
 				<input type="checkbox" name="piece_type" value="Bishop" id="Bishop">
-				<label for="Bishop">Bispo</label>
+				<label for="Bishop">
+					<div class="upgrade-option">
+						♝
+						<p>Bispo</p>
+					</div>
+				</label>
 
 				<input type="checkbox" name="piece_type" value="Queen" id="Queen">
-				<label for="Queen">Rainha</label>
+				<label for="Queen">
+					<div class="upgrade-option">
+						♛
+						<p>Rainha</p>
+					</div>
+				</label>
 			</div>
 		</div>
 		</div>
 	<div id="modal" class="modal">
 		<div class="modal-content">
-		  <span onclick="board.fecharModal()" style="float: right; cursor: pointer;">&times;</span>
+		  <span onclick="board.closeModal()" style="float: right; cursor: pointer;">&times;</span>
+		  <h2 style="margin-top: 0;">O jogo terminou!</h2>
 		  <div id="modal-text">
 			  <!-- Conteúdo do modal será adicionado aqui -->
 			</div>
-		  <a class="navbar-btn" href="/xadrez.html"><button>Reiniciar</button></a>
+			<div class="modal-footer">
+				<a class="modal-btn secondary" href="/xadrez.html">Fechar</a>
+			</div>
 		</div>
 	  </div>
 </body>
