@@ -16,7 +16,7 @@
 <body>
 	<nav>
 		<a class="navbar-btn" href="/xadrez.html">Reiniciar</a>
-		<a class="navbar-btn" id="desistir">Desistir</a>
+		<a class="navbar-btn" id="desistir" onclick="board.giveUp()">Desistir</a>
 	</nav>
 	<div id="board"></div>
 	<div id="promote-pawn" class="modal">
@@ -60,11 +60,14 @@
 		</div>
 	<div id="modal" class="modal">
 		<div class="modal-content">
-		  <span onclick="board.fecharModal()" style="float: right; cursor: pointer;">&times;</span>
+		  <span onclick="board.closeModal()" style="float: right; cursor: pointer;">&times;</span>
+		  <h2 style="margin-top: 0;">O jogo terminou!</h2>
 		  <div id="modal-text">
 			  <!-- Conteúdo do modal será adicionado aqui -->
 			</div>
-		  <a class="navbar-btn" href="/xadrez.html"><button>Reiniciar</button></a>
+			<div class="modal-footer">
+				<a class="modal-btn secondary" href="/xadrez.html">Fechar</a>
+			</div>
 		</div>
 	  </div>
 </body>
