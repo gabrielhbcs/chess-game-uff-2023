@@ -170,7 +170,6 @@ class Board {
 				console.log('Draw');
 				break;
 			case GAMESTATES.PLAYING:
-				console.log('Jogando');
 				break;
 			default:
 				console.log('Estado desconhecido');
@@ -473,7 +472,7 @@ class Board {
 		this.setState();
 		this.currentPlayer = this.currentPlayer === COMPUTER_COLOR ? PLAYER_COLOR : COMPUTER_COLOR;
 		this.setAllPossibleMovements();
-		this.drawBoard();
+		// this.drawBoard();
 	}
 
 	// motivos de IA
