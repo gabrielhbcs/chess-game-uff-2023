@@ -12,7 +12,7 @@ const GAMESTATES = {
     PLAYING: 'playing'
   };
 
-const DEPTH = 2;
+const DEPTH = 1;
 const AMPL = 5;
 
 // Pesos
