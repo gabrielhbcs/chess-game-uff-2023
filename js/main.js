@@ -7,5 +7,13 @@ window.onload = function() {
 		piece.draw(square);
 	}
 
-	board.playAI();
+	// declarar funçao de desistir
+	const giveUpBtn = document.querySelector('nav').lastElementChild;
+	giveUpBtn.addEventListener('click', (e) => {
+		e.preventDefault();
+		alert('perdeu baibe');
+	})
+	setTimeout(function(){
+		board.playAI();
+	}, 500);
 }
