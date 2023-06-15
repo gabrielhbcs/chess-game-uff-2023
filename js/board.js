@@ -156,7 +156,7 @@ class Board {
 				console.log('Peças pretas em Cheque');
 				break;
 			case GAMESTATES.WHITEMATE || GAMESTATES.BLACKMATE:
-				this.openModal(`O jogo terminou. ${this.currentPlayer === COMPUTER_COLOR ? "As máquinas vão dominar o mundo." : "Os seres humanos viverão mais um dia..."}.`);
+				this.openModal(`O jogo terminou. ${this.currentPlayer != COMPUTER_COLOR ? "As máquinas vão dominar o mundo." : "Os seres humanos viverão mais um dia..."}.`);
 			case GAMESTATES.WHITEMATE:
 				console.log('Peças brancas em Chequemate');
 				break;
