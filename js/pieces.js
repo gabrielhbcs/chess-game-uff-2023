@@ -20,6 +20,47 @@ class Move {
 		this.from = from;
 		this.to = to;
 		this.target = target;
+		this.moveValue = this.calculateMoveValue();
+	}
+
+	// Calcula o valor do movimento (pra IA)
+	calculateMoveValue() {	
+		let moveValue = 0;
+	
+		if (this.target) {
+			moveValue += this.target.pieceValue;
+		}
+
+		let pieceType = this.piece.type;
+		let pieceValue =  0
+	
+		switch (pieceType) {
+			case 'pawn':
+				pieceValue = PAWNPOSITIONVALUES[this.to.row][this.to.col] * POSWEIGHT;
+				break;
+			case 'knight':
+				pieceValue = KNIGHTPOSITIONVALUES[this.to.row][this.to.col] * POSWEIGHT;
+				break;
+			case 'bishop':
+				pieceValue = BISHOPPOSITIONVALUES[this.to.row][this.to.col] * POSWEIGHT;
+				break;
+			case 'rook':
+				pieceValue = ROOKPOSITIONVALUES[this.to.row][this.to.col] * POSWEIGHT;
+				break;
+			case 'queen':
+				pieceValue = QUEENPOSITIONVALUES[this.to.row][this.to.col] * POSWEIGHT;
+				break;
+			case 'king':
+				pieceValue = KINGPOSITIONVALUES[this.to.row][this.to.col] * POSWEIGHT;
+				break;
+			default:
+				console.error('Piece type not recognized: ', pieceType);
+				break;
+		}
+
+		moveValue += pieceValue
+	
+		return moveValue;
 	}
 }
 
@@ -65,7 +106,7 @@ class Piece {
 			row.forEach((col, colIndex) => {
 				if ((board.isEmpty(rowIndex, colIndex) || board.isOpponent(rowIndex, colIndex, this.color))) {
 					if (validAndSafe && this.isValidAndSafeMove(rowIndex, colIndex, board) || (!validAndSafe && this.isValidMove(rowIndex, colIndex, board))) {
-						availableMoves.push(new Move(this, new Position(this.row, this.col), new Position(rowIndex, colIndex), board.getPiece(rowIndex, colIndex)))
+						availableMoves.push(new Move(this, new Position(this.row, this.col), new Position(rowIndex, colIndex), board.getPiece(rowIndex, colIndex), ))
 					}
 				}
 			})
@@ -114,6 +155,7 @@ class King extends Piece {
 		this.type = "king";
 		// atributo para validação do roque
 		this.hasMoved = false;
+		this.pieceValue = 100;
 	}
 
 	//mudança de comportamento para validação do roque
@@ -174,6 +216,7 @@ class Queen extends Piece {
 	constructor(color, row, col) {
 		super(color, row, col);
 		this.type = "queen";
+		this.pieceValue = 9;
 	}
 
 	isValidMove(newRow, newCol, playerBoard = board) {
@@ -188,7 +231,7 @@ class Queen extends Piece {
 			let checkRow = this.row + deltaRow;
 			let checkCol = this.col + deltaCol;
 			while (checkRow !== newRow || checkCol !== newCol) {
-				if (playerBoard.isEmpty(checkRow, checkCol) === false) return false;
+				if (playerBoard.isEmpty(checkRow, checkCol) === false || (checkCol === newCol && checkRow === newRow && playerBoard.isOpponent(checkRow, checkCol, this.color))) return false;
 				checkRow += deltaRow;
 				checkCol += deltaCol;
 			}
@@ -204,6 +247,7 @@ class Bishop extends Piece {
 	constructor(color, row, col) {
 		super(color, row, col);
 		this.type = "bishop";
+		this.pieceValue = 3;	
 	}
 
 	isValidMove(newRow, newCol,  playerBoard = board) {
@@ -218,7 +262,7 @@ class Bishop extends Piece {
 			let checkRow = this.row + deltaRow;
 			let checkCol = this.col + deltaCol;
 			while (checkRow !== newRow || checkCol !== newCol) {
-				if (playerBoard.isEmpty(checkRow, checkCol) === false) return false;
+				if (playerBoard.isEmpty(checkRow, checkCol) === false || (checkCol === newCol && checkRow === newRow && playerBoard.isOpponent(checkRow, checkCol, this.color))) return false;
 				checkRow += deltaRow;
 				checkCol += deltaCol;
 			}
@@ -234,6 +278,7 @@ class Knight extends Piece {
 	constructor(color, row, col) {
 		super(color, row, col);
 		this.type = "knight";
+		this.pieceValue = 3;
 	}
 
 	isValidMove(targetRow, targetCol, playerBoard = board) {
@@ -259,6 +304,7 @@ class Rook extends Piece {
 		this.type = "rook";
 		//atributo para a validação do roque
 		this.hasMoved = false;
+		this.pieceValue = 5;
 	}
 
 	//mudança de comportamento para validação do roque
@@ -296,6 +342,7 @@ class Pawn extends Piece {
 	constructor(color, row, col) {
 		super(color, row, col);
 		this.type = "pawn";
+		this.pieceValue = 1;
 	}
 
 	isValidMove(newRow, newCol, playerBoard = board) {
