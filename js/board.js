@@ -29,7 +29,6 @@ class Board {
 		this.element = element
 		this.currentPlayer = 'white'
 		this.squares = [];
-		this.state = '';
 		this.moves = [];   // Pode ser removido
 		this.movesWithoutCapture = 0;
 		this.allPossibleMovements = [];
@@ -240,7 +239,6 @@ class Board {
 	}
 
 	// Retorna a jogada mais recente do histórico
-
 	getLastMove() {
 		return this.moves.length > 0 ? this.moves[this.moves.length - 1] : null;
 	}
